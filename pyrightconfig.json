@@ -6,16 +6,12 @@
 		"**/extern", // Vendored
 		"**/_vendor", // Vendored
 		"setuptools/_distutils", // Vendored
-		"**/tests", // Disabled as long as analyzeUnannotatedFunctions=false to reduce log spam
-		"**/_*", // Disabled as long as analyzeUnannotatedFunctions=false to reduce log spam
 	],
 	// CI should test for all versions, local development gets hints for oldest supported
 	"pythonVersion": "3.8",
 	// For now we don't mind if mypy's `type: ignore` comments accidentally suppresses pyright issues
 	"enableTypeIgnoreComments": true,
 	"typeCheckingMode": "basic",
-	// For now, align with mypy's default of skipping unnanotated functions, only care about public API which should be annotated
-	"analyzeUnannotatedFunctions": false,
 	// TODO: Test environment is not yet properly configured to install all imported packages
 	"reportMissingImports": "none",
 	// Too many issues caused by vendoring and dynamic patching, still worth fixing when we can

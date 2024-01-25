@@ -79,6 +79,7 @@ def get_abi3_suffix():
             return suffix
         elif suffix == '.pyd':  # Windows
             return suffix
+    raise ValueError("suffix not found")
 
 
 class build_ext(_build_ext):
@@ -101,7 +102,8 @@ class build_ext(_build_ext):
         package = '.'.join(modpath[:-1])
         package_dir = build_py.get_package_dir(package)
         inplace_file = os.path.join(package_dir, os.path.basename(filename))
-        regular_file = os.path.join(self.build_lib, filename)
+        # FIXME: How is `self.build_lib` anything else than None?
+        regular_file = os.path.join(self.build_lib, filename) #  pyright: ignore[reportCallIssue, reportArgumentType]
         return (inplace_file, regular_file)
 
     def copy_extensions_to_source(self):
@@ -151,7 +153,7 @@ class build_ext(_build_ext):
                 output_cache = _compiled_file_name(regular_stub, optimization=opt)
                 yield (output_cache, inplace_cache)
 
-    def get_ext_filename(self, fullname):
+    def get_ext_filename(self, fullname: str):
         so_ext = os.getenv('SETUPTOOLS_EXT_SUFFIX')
         if so_ext:
             filename = os.path.join(*fullname.split('.')) + so_ext

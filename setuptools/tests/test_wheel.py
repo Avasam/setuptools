@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing_extensions import Required, TypedDict
 import zipfile
 
 import pytest
@@ -176,9 +177,17 @@ class Record:
     def __repr__(self):
         return '%s(**%r)' % (self._id, self._fields)
 
+class WheelInstallTest(TypedDict, total=False):
+    id: Required[str]
+    file_defs: dict
+    setup_kwargs: dict
+    install_tree: set
+    install_requires: str
+    extras_require: dict
+    requires_txt: str
 
 WHEEL_INSTALL_TESTS = (
-    dict(
+    WheelInstallTest(
         id='basic',
         file_defs={'foo': {'__init__.py': ''}},
         setup_kwargs=dict(
@@ -191,13 +200,13 @@ WHEEL_INSTALL_TESTS = (
             }
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='utf-8',
         setup_kwargs=dict(
             description='Description accentuée',
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='data',
         file_defs={
             'data.txt': DALS(
@@ -216,7 +225,7 @@ WHEEL_INSTALL_TESTS = (
             }
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='extension',
         file_defs={
             'extension.c': DALS(
@@ -284,7 +293,7 @@ WHEEL_INSTALL_TESTS = (
             ]
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='header',
         file_defs={
             'header.h': DALS(
@@ -309,7 +318,7 @@ WHEEL_INSTALL_TESTS = (
             ]
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='script',
         file_defs={
             'script.py': DALS(
@@ -340,7 +349,7 @@ WHEEL_INSTALL_TESTS = (
             }
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='requires1',
         install_requires='foobar==2.0',
         install_tree=flatten_tree({
@@ -360,7 +369,7 @@ WHEEL_INSTALL_TESTS = (
             """
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='requires2',
         install_requires="""
         bar
@@ -374,14 +383,14 @@ WHEEL_INSTALL_TESTS = (
             """
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='requires3',
         install_requires="""
         bar; %r != sys_platform
         """
         % sys.platform,
     ),
-    dict(
+    WheelInstallTest(
         id='requires4',
         install_requires="""
         foo
@@ -398,7 +407,7 @@ WHEEL_INSTALL_TESTS = (
             """
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='requires5',
         extras_require={
             'extra': 'foobar; %r != sys_platform' % sys.platform,
@@ -409,7 +418,7 @@ WHEEL_INSTALL_TESTS = (
             """
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='requires_ensure_order',
         install_requires="""
         foo
@@ -440,7 +449,7 @@ WHEEL_INSTALL_TESTS = (
             """
         ),
     ),
-    dict(
+    WheelInstallTest(
         id='namespace_package',
         file_defs={
             'foo': {
@@ -472,7 +481,7 @@ WHEEL_INSTALL_TESTS = (
             ]
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='empty_namespace_package',
         file_defs={
             'foobar': {
@@ -505,7 +514,7 @@ WHEEL_INSTALL_TESTS = (
             ]
         }),
     ),
-    dict(
+    WheelInstallTest(
         id='data_in_package',
         file_defs={
             'foo': {

@@ -442,11 +442,10 @@ class DirectorySandbox(AbstractSandbox):
         raise SandboxViolation(operation, args, kw)
 
     if _file:
-
         def _file(self, path, mode='r', *args, **kw):
             if mode not in ('r', 'rt', 'rb', 'rU', 'U') and not self._ok(path):
                 self._violation("file", path, mode, *args, **kw)
-            return _file(path, mode, *args, **kw)
+            return _file(path, mode, *args, **kw)  # pyright: ignore[reportOptionalCall] # Unsafe, but we never re-assign _file
 
     def _open(self, path, mode='r', *args, **kw):
         if mode not in ('r', 'rt', 'rb', 'rU', 'U') and not self._ok(path):

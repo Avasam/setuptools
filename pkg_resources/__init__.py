@@ -27,7 +27,7 @@ import io
 import time
 import re
 import types
-from typing import Protocol
+from typing import Any, Protocol, cast
 import zipfile
 import zipimport
 import warnings
@@ -80,25 +80,25 @@ __import__('pkg_resources.extern.packaging.requirements')
 __import__('pkg_resources.extern.packaging.markers')
 __import__('pkg_resources.extern.packaging.utils')
 
-# declare some globals that will be defined later to
-# satisfy the linters.
-require = None
-working_set = None
-add_activation_listener = None
-resources_stream = None
-cleanup_resources = None
-resource_dir = None
-resource_stream = None
-set_extraction_path = None
-resource_isdir = None
-resource_string = None
-iter_entry_points = None
-resource_listdir = None
-resource_filename = None
-resource_exists = None
-_distribution_finders = None
-_namespace_handlers = None
-_namespace_packages = None
+def _dummy(*args: object, **kwargs: object) -> Any:
+    pass
+
+# declare some globals that will be defined later to satisfy linters.
+require = _dummy
+working_set = cast("WorkingSet", None)
+add_activation_listener = _dummy
+cleanup_resources = _dummy
+resource_stream = _dummy
+set_extraction_path = _dummy
+resource_isdir = _dummy
+resource_string = _dummy
+iter_entry_points = _dummy
+resource_listdir = _dummy
+resource_filename = _dummy
+resource_exists = _dummy
+_distribution_finders: dict = {}
+_namespace_handlers: dict = {}
+_namespace_packages: dict = {}
 
 
 warnings.warn(
@@ -3210,6 +3210,7 @@ def _find_adapter(registry, ob):
     for t in types:
         if t in registry:
             return registry[t]
+    raise ValueError("Adapter not found")
 
 
 def ensure_directory(path):

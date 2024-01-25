@@ -62,7 +62,8 @@ def _read_list_from_msg(msg: Message, field: str) -> Optional[List[str]]:
 
 
 def _read_payload_from_msg(msg: Message) -> Optional[str]:
-    value = msg.get_payload().strip()
+    payload = msg.get_payload()
+    value = payload.strip() if isinstance(payload, str) else ""
     if value == 'UNKNOWN' or not value:
         return None
     return value

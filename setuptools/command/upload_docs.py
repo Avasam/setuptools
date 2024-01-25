@@ -76,6 +76,8 @@ class upload_docs(upload):
         self.announce('Using upload directory %s' % self.target_dir)
 
     def create_zipfile(self, filename):
+        if self.target_dir is None:
+            raise ValueError("self.target_dir cannot be None")
         zip_file = zipfile.ZipFile(filename, "w")
         try:
             self.mkpath(self.target_dir)  # just in case

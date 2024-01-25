@@ -8,6 +8,7 @@ from .extern.jaraco.functools import pass_none
 from ._importlib import metadata
 from ._itertools import ensure_unique
 from .extern.more_itertools import consume
+metadata_EntryPoints = metadata.EntryPoints
 
 
 def ensure_valid(ep):
@@ -33,14 +34,14 @@ def load_group(value, group):
     # normalize to a single sequence of lines
     lines = yield_lines(value)
     text = f'[{group}]\n' + '\n'.join(lines)
-    return metadata.EntryPoints._from_text(text)
+    return metadata_EntryPoints._from_text(text)
 
 
 def by_group_and_name(ep):
     return ep.group, ep.name
 
 
-def validate(eps: metadata.EntryPoints):
+def validate(eps: metadata_EntryPoints):
     """
     Ensure entry points are unique by group and name and validate each.
     """
@@ -56,7 +57,7 @@ def load(eps):
     groups = itertools.chain.from_iterable(
         load_group(value, group) for group, value in eps.items()
     )
-    return validate(metadata.EntryPoints(groups))
+    return validate(metadata_EntryPoints(groups))
 
 
 @load.register(str)
@@ -70,14 +71,14 @@ def _(eps):
     >>> ep.value
     'bar'
     """
-    return validate(metadata.EntryPoints(metadata.EntryPoints._from_text(eps)))
+    return validate(metadata_EntryPoints(metadata_EntryPoints._from_text(eps)))
 
 
 load.register(type(None), lambda x: x)
 
 
 @pass_none
-def render(eps: metadata.EntryPoints):
+def render(eps: metadata_EntryPoints):
     by_group = operator.attrgetter('group')
     groups = itertools.groupby(sorted(eps, key=by_group), by_group)
 

@@ -19,7 +19,7 @@ functions among several configuration file formats.
 """
 
 import ast
-import importlib
+import importlib.util
 import os
 import pathlib
 import sys
@@ -39,7 +39,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    cast,
 )
 from pathlib import Path
 from types import ModuleType
@@ -341,17 +340,17 @@ def version(value: Union[Callable, Iterable[Union[str, int]], str]) -> str:
     it should be normalised to string.
     """
     if callable(value):
-        value = value()
+        _value = value()
+    else:
+        _value = value
 
-    value = cast(Iterable[Union[str, int]], value)
-
-    if not isinstance(value, str):
-        if hasattr(value, '__iter__'):
-            value = '.'.join(map(str, value))
+    if not isinstance(_value, str):
+        if hasattr(_value, '__iter__'):
+            _value = '.'.join(map(str, _value))
         else:
-            value = '%s' % value
+            _value = '%s' % _value
 
-    return value
+    return _value
 
 
 def canonic_package_data(package_data: dict) -> dict:
@@ -385,7 +384,7 @@ def entry_points(text: str, text_source="entry-points") -> Dict[str, dict]:
     (that correspond to the entry-point value).
     """
     parser = ConfigParser(default_section=None, delimiters=("=",))  # type: ignore
-    parser.optionxform = str  # case sensitive
+    parser.optionxform = lambda optionstr: str(optionstr)  # case sensitive, support kwarg
     parser.read_string(text, text_source)
     groups = {k: dict(v.items()) for k, v in parser.items()}
     groups.pop(parser.default_section, None)

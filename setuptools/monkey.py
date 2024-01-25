@@ -8,12 +8,12 @@ import platform
 import sys
 import types
 from importlib import import_module
-from typing import List, TypeVar
+from typing import List, Optional, TypeVar, Union, overload
 
 import distutils.filelist
 
 
-_T = TypeVar("_T")
+_UnpatchedT = TypeVar("_UnpatchedT", type, types.FunctionType)
 
 __all__: List[str] = []
 """
@@ -22,7 +22,7 @@ if you think you need this functionality.
 """
 
 
-def _get_mro(cls):
+def _get_mro(cls: type):
     """
     Returns the bases classes for cls sorted by the MRO.
 
@@ -35,8 +35,11 @@ def _get_mro(cls):
         return (cls,) + cls.__bases__
     return inspect.getmro(cls)
 
-
-def get_unpatched(item: _T) -> _T:
+@overload
+def get_unpatched(item: _UnpatchedT) -> _UnpatchedT:...
+@overload
+def get_unpatched(item: object) -> None:...
+def get_unpatched(item: Union[type, types.FunctionType, object]) -> Optional[Union[type, types.FunctionType]]:
     lookup = (
         get_unpatched_class
         if isinstance(item, type)
@@ -117,7 +120,7 @@ def patch_func(replacement, target_mod, func_name):
     setattr(target_mod, func_name, replacement)
 
 
-def get_unpatched_function(candidate):
+def get_unpatched_function(candidate) -> types.FunctionType:
     return candidate.unpatched
 
 

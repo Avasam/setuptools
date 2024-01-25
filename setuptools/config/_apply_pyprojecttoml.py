@@ -27,7 +27,6 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast,
 )
 
 from ..errors import RemovedConfigError
@@ -36,10 +35,11 @@ from ..warnings import SetuptoolsWarning
 if TYPE_CHECKING:
     from setuptools._importlib import metadata  # noqa
     from setuptools.dist import Distribution  # noqa
+    metadata_EntryPoint = metadata.EntryPoint
 
 EMPTY: Mapping = MappingProxyType({})  # Immutable dict-like
 _Path = Union[os.PathLike, str]
-_DictOrStr = Union[dict, str]
+_DictOrStr = Union[Dict[str, str], str]
 _CorrespFn = Callable[["Distribution", Any, _Path], None]
 _Correspondence = Union[str, _CorrespFn]
 
@@ -157,11 +157,11 @@ def _long_description(dist: "Distribution", val: _DictOrStr, root_dir: _Path):
     from setuptools.config import expand
 
     if isinstance(val, str):
-        file: Union[str, list] = val
+        file = val
         text = expand.read_files(file, root_dir)
         ctype = _guess_content_type(val)
     else:
-        file = val.get("file") or []
+        file = val.get("file") or ()
         text = val.get("text") or expand.read_files(file, root_dir)
         ctype = val["content-type"]
 
@@ -171,7 +171,7 @@ def _long_description(dist: "Distribution", val: _DictOrStr, root_dir: _Path):
         _set_config(dist, "long_description_content_type", ctype)
 
     if file:
-        dist._referenced_files.add(cast(str, file))
+        dist._referenced_files.add(file)
 
 
 def _license(dist: "Distribution", val: dict, root_dir: _Path):
@@ -280,7 +280,7 @@ def _valid_command_options(cmdclass: Mapping = EMPTY) -> Dict[str, Set[str]]:
     return valid_options
 
 
-def _load_ep(ep: "metadata.EntryPoint") -> Optional[Tuple[str, Type]]:
+def _load_ep(ep: "metadata_EntryPoint") -> Optional[Tuple[str, Type]]:
     # Ignore all the errors
     try:
         return (ep.name, ep.load())

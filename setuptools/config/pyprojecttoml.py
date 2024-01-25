@@ -297,10 +297,13 @@ class _ConfigExpander:
     def _obtain_version(self, dist: "Distribution", package_dir: Mapping[str, str]):
         # Since plugins can set version, let's silently skip if it cannot be obtained
         if "version" in self.dynamic and "version" in self.dynamic_cfg:
-            return _expand.version(self._obtain(dist, "version", package_dir))
+            return _expand.version(
+                # We already an early dynamic check for the presense of "version"
+                self._obtain(dist, "version", package_dir) # pyright: ignore[reportArgumentType]
+            )
         return None
 
-    def _obtain_readme(self, dist: "Distribution") -> Optional[Dict[str, str]]:
+    def _obtain_readme(self, dist: "Distribution") -> Optional[Dict[str, Optional[str]]]:
         if "readme" not in self.dynamic:
             return None
 

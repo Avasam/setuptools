@@ -1,4 +1,3 @@
-import sys
 import distutils.errors
 import urllib.request
 import urllib.error
@@ -126,7 +125,7 @@ class TestPackageIndex:
             f.write('<div>content</div>')
         url = 'file:' + urllib.request.pathname2url(str(tmpdir)) + '/'
         res = setuptools.package_index.local_open(url)
-        assert 'content' in res.read()
+        assert 'content' in res.read()  # pyright: ignore[reportOperatorIssue] # TODO: This may be an upstream issue? To validate
 
     def test_egg_fragment(self):
         """

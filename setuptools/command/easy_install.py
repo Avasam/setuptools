@@ -1649,7 +1649,7 @@ class PthDistributions(Environment):
         while paths and not paths[-1].strip():
             paths.pop()
             dirty = True
-        return paths, dirty or (paths and saw_import)
+        return paths, dirty or bool(paths and saw_import)
 
     def _load(self):
         if os.path.isfile(self.filename):
@@ -1791,7 +1791,7 @@ def auto_chmod(func, arg, exc):
         return func(arg)
     et, ev, _ = sys.exc_info()
     # TODO: This code doesn't make sense. What is it trying to do?
-    raise (ev[0], ev[1] + (" %s %s" % (func, arg)))
+    raise (ev[0], ev[1] + (" %s %s" % (func, arg)))  # pyright: ignore[reportGeneralTypeIssues, reportIndexIssue, reportOptionalSubscript]
 
 
 def update_dist_caches(dist_path, fix_zipimporter_caches):

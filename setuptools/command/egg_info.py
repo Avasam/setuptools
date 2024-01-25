@@ -559,7 +559,7 @@ class manifest_maker(sdist):
 
     def _manifest_normalize(self, path):
         path = unicode_utils.filesys_decode(path)
-        return path.replace(os.sep, '/')
+        return path.replace(os.sep, '/') # pyright: ignore[reportOptionalMemberAccess] # Raise error on None
 
     def write_manifest(self):
         """

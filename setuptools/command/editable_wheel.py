@@ -1,3 +1,5 @@
+# pyright: reportOptionalMemberAccess=false
+# TODO: Fix get_command_obj in distutils stubs (which should create by default)
 """
 Create a wheel that, when installed, will make the source package 'editable'
 (add it to the interpreter's path, including metadata) per PEP 660. Replaces
@@ -280,7 +282,7 @@ class editable_wheel(Command):
         # TODO: Once plugins/customisations had the chance to catch up, replace
         #       `self._run_build_subcommands()` with `self.run_command("build")`.
         #       Also remove _safely_run, TestCustomBuildPy. Suggested date: Aug/2023.
-        build: Command = self.get_finalized_command("build")
+        build = self.get_finalized_command("build")
         for name in build.get_sub_commands():
             cmd = self.get_finalized_command(name)
             if name == "build_py" and type(cmd) != build_py_cls:
@@ -355,7 +357,7 @@ class editable_wheel(Command):
         name: str,
         tag: str,
         build_lib: _Path,
-    ) -> "EditableStrategy":
+    ) -> "_LinkTree | _StaticPth | _TopLevelFinder":
         """Decides which strategy to use to implement an editable installation."""
         build_name = f"__editable__.{name}-{tag}"
         project_dir = Path(self.project_dir)

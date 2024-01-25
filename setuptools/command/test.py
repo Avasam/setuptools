@@ -1,8 +1,11 @@
+from collections.abc import Callable
 import os
 import operator
 import sys
 import contextlib
 import itertools
+from typing import Generic, List, TypeVar, overload
+from typing_extensions import Self
 import unittest
 from distutils.errors import DistutilsError, DistutilsOptionError
 from distutils import log
@@ -61,12 +64,16 @@ class ScanningLoader(TestLoader):
         else:
             return tests[0]  # don't create a nested suite for only one return
 
-
+_T = TypeVar("_T")
 # adapted from jaraco.classes.properties:NonDataProperty
-class NonDataProperty:
-    def __init__(self, fget):
+class NonDataProperty(Generic[_T]):
+    def __init__(self, fget: Callable[..., _T]):
         self.fget = fget
 
+    @overload
+    def __get__(self, obj: None, objtype: object=None) -> Self: ...
+    @overload
+    def __get__(self, obj: object, objtype=None) -> _T: ...
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
@@ -113,7 +120,7 @@ class test(Command):
             self.test_runner = getattr(self.distribution, 'test_runner', None)
 
     @NonDataProperty
-    def test_args(self):
+    def test_args(self) -> List[str]:
         return list(self._test_args())
 
     def _test_args(self):
@@ -168,8 +175,7 @@ class test(Command):
 
         Do this in a context that restores the value on exit.
         """
-        nothing = object()
-        orig_pythonpath = os.environ.get('PYTHONPATH', nothing)
+        orig_pythonpath = os.environ.get('PYTHONPATH')
         current_pythonpath = os.environ.get('PYTHONPATH', '')
         try:
             prefix = os.pathsep.join(unique_everseen(paths))
@@ -179,7 +185,7 @@ class test(Command):
                 os.environ['PYTHONPATH'] = new_path
             yield
         finally:
-            if orig_pythonpath is nothing:
+            if orig_pythonpath is None:
                 os.environ.pop('PYTHONPATH', None)
             else:
                 os.environ['PYTHONPATH'] = orig_pythonpath

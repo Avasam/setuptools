@@ -1,3 +1,6 @@
+from typing import Dict, Tuple
+
+
 extensions = [
     'sphinx.ext.autodoc',
     'jaraco.packaging.sphinx',
@@ -93,7 +96,7 @@ nitpicky = True
 # Include Python intersphinx mapping to prevent failures
 # jaraco/skeleton#51
 extensions += ['sphinx.ext.intersphinx']
-intersphinx_mapping = {
+intersphinx_mapping: Dict[str, Tuple[str, None]] = {
     'python': ('https://docs.python.org/3', None),
 }
 

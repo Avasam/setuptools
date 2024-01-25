@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Dict, List, Protocol
 from distutils.command.build import build as _build
 
@@ -105,6 +106,7 @@ class SubCommand(Protocol):
     def run(self):
         """(Required by the original :class:`setuptools.Command` interface)"""
 
+    @abstractmethod
     def get_source_files(self) -> List[str]:
         """
         Return a list of all files that are used by the command to create the expected
@@ -116,6 +118,7 @@ class SubCommand(Protocol):
         All files should be strings relative to the project root directory.
         """
 
+    @abstractmethod
     def get_outputs(self) -> List[str]:
         """
         Return a list of files intended for distribution as they would have been
@@ -129,6 +132,7 @@ class SubCommand(Protocol):
            and don't correspond to any source file already present in the project.
         """
 
+    @abstractmethod
     def get_output_mapping(self) -> Dict[str, str]:
         """
         Return a mapping between destination files as they would be produced by the

@@ -24,13 +24,9 @@ def parse_strings(strs: _StrOrIter) -> Iterator[str]:
 
 
 @overload
-def parse(strs: _StrOrIter) -> Iterator[Requirement]: ...
-
-
+def parse(strs: _StrOrIter) -> "map[Requirement]": ...
 @overload
-def parse(strs: _StrOrIter, parser: Callable[[str], _T]) -> Iterator[_T]: ...
-
-
+def parse(strs: _StrOrIter, parser: Callable[[str], _T]) -> "map[_T]": ...
 def parse(strs, parser=parse_req):
     """
     Replacement for ``pkg_resources.parse_requirements`` that uses ``packaging``.

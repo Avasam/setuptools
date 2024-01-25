@@ -24,7 +24,10 @@ bump_version_command = [
 def get_version():
     cmd = bump_version_command + ['--dry-run', '--verbose']
     out = subprocess.check_output(cmd, text=True)
-    return re.search('^new_version=(.*)', out, re.MULTILINE).group(1)
+    match = re.search('^new_version=(.*)', out, re.MULTILINE)
+    if not match:
+        return None
+    return match.group(1)
 
 
 def update_changelog():

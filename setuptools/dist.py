@@ -257,6 +257,10 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
     the distribution.
     """
 
+    packages: Optional[List]
+    py_modules: Optional[List]
+    ext_modules: Optional[List]
+
     _DISTUTILS_UNSUPPORTED_METADATA = {
         'long_description_content_type': lambda: None,
         'project_urls': dict,
@@ -300,7 +304,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
         metadata_only = set(self._DISTUTILS_UNSUPPORTED_METADATA)
         metadata_only -= {"install_requires", "extras_require"}
         dist_attrs = {k: v for k, v in attrs.items() if k not in metadata_only}
-        _Distribution.__init__(self, dist_attrs)
+        super().__init__(dist_attrs)
 
         # Private API (setuptools-use only, not restricted to Distribution)
         # Stores files that are referenced by the configuration and need to be in the
@@ -812,7 +816,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
             )
         else:
             new = [item for item in value if item not in old]
-            setattr(self, name, old + new)
+            setattr(self, name, list(old) + new)
 
     def exclude(self, **attrs):
         """Remove items from distribution that are named in keyword arguments

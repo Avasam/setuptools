@@ -130,7 +130,9 @@ class install(orig.install):
         cmd.package_index.scan(glob.glob('*.egg'))
 
         self.run_command('bdist_egg')
-        args = [self.distribution.get_command_obj('bdist_egg').egg_output]
+        
+        # TODO: Fix get_command_obj in distutils stubs (which should create by default)
+        args = [self.distribution.get_command_obj('bdist_egg').egg_output]  # pyright: ignore[reportOptionalMemberAccess]
 
         if setuptools.bootstrap_install_from:
             # Bootstrap self-installation of setuptools

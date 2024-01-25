@@ -5,7 +5,7 @@ import os
 import re
 from contextlib import contextmanager
 from textwrap import indent, wrap
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Union, cast
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Union
 
 from .fastjsonschema_exceptions import JsonSchemaValueException
 
@@ -297,7 +297,7 @@ class _SummaryWriter:
         if path[-1] == "type" and not self._is_property(path):
             type_ = self._jargon(value)
             return (
-                f"[{', '.join(type_)}]" if isinstance(value, list) else cast(str, type_)
+                f"[{', '.join(type_)}]" if isinstance(type_, list) else type_
             )
         return repr(value)
 

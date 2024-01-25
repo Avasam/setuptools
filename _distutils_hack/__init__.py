@@ -54,6 +54,7 @@ def ensure_local_distutils():
 
     # check that submodules load as expected
     core = importlib.import_module('distutils.core')
+    assert core.__file__ is not None, core.__file__
     assert '_distutils' in core.__file__, core.__file__
     assert 'setuptools._distutils.log' not in sys.modules
 

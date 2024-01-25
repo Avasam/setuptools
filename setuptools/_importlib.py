@@ -43,7 +43,7 @@ if sys.version_info < (3, 10):
     disable_importlib_metadata_finder(metadata)
 else:
     import importlib.metadata as metadata  # noqa: F401
-
+metadata=metadata
 
 if sys.version_info < (3, 9):
     from setuptools.extern import importlib_resources as resources  # type: ignore[attr-defined]

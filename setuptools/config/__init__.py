@@ -3,19 +3,22 @@
 """
 
 from functools import wraps
-from typing import Callable, TypeVar, cast
+from typing import Callable, TypeVar
+
+from typing_extensions import ParamSpec
 
 from ..warnings import SetuptoolsDeprecationWarning
 from . import setupcfg
 
-Fn = TypeVar("Fn", bound=Callable)
+_R = TypeVar("_R")
+_P = ParamSpec("_P")
 
-__all__ = ('parse_configuration', 'read_configuration')
+__all__ = ("parse_configuration", "read_configuration")
 
 
-def _deprecation_notice(fn: Fn) -> Fn:
+def _deprecation_notice(fn: Callable[_P, _R]) -> Callable[_P, _R]:
     @wraps(fn)
-    def _wrapper(*args, **kwargs):
+    def _wrapper(*args: _P.args, **kwargs: _P.kwargs):
         SetuptoolsDeprecationWarning.emit(
             "Deprecated API usage.",
             f"""
@@ -36,7 +39,7 @@ def _deprecation_notice(fn: Fn) -> Fn:
         )
         return fn(*args, **kwargs)
 
-    return cast(Fn, _wrapper)
+    return _wrapper
 
 
 read_configuration = _deprecation_notice(setupcfg.read_configuration)

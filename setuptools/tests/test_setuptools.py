@@ -53,7 +53,7 @@ class TestDepends:
         def f1():
             global x, y, z
             x = "test"
-            y = z
+            y = z  # pyright: ignore[reportUnboundVariable] # Testing unassigned variables
 
         fc = f1.__code__
 

@@ -1,8 +1,10 @@
 """Extensions to the 'distutils' for large or complex distributions"""
 
+from collections.abc import Mapping
 import functools
 import os
 import re
+from typing import Any
 
 import _distutils_hack.override  # noqa: F401
 import distutils.core
@@ -46,7 +48,7 @@ def _install_setup_requires(attrs):
         fetch_build_eggs interface.
         """
 
-        def __init__(self, attrs):
+        def __init__(self, attrs: Mapping[str, Any]):
             _incl = 'dependency_links', 'setup_requires'
             filtered = {k: attrs[k] for k in set(_incl) & set(attrs)}
             super().__init__(filtered)
