@@ -298,8 +298,8 @@ class _ConfigExpander:
         # Since plugins can set version, let's silently skip if it cannot be obtained
         if "version" in self.dynamic and "version" in self.dynamic_cfg:
             return _expand.version(
-                # We already an early dynamic check for the presense of "version"
-                self._obtain(dist, "version", package_dir) # pyright: ignore[reportArgumentType]
+                # We already do an early check for the presence of "version"
+                self._obtain(dist, "version", package_dir)  # pyright: ignore[reportArgumentType]
             )
         return None
 
@@ -310,9 +310,10 @@ class _ConfigExpander:
         dynamic_cfg = self.dynamic_cfg
         if "readme" in dynamic_cfg:
             return {
+                # We already do an early check for the presence of "readme"
                 "text": self._obtain(dist, "readme", {}),
                 "content-type": dynamic_cfg["readme"].get("content-type", "text/x-rst"),
-            }
+            }  # pyright: ignore[reportReturnType]
 
         self._ensure_previously_set(dist, "readme")
         return None

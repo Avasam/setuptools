@@ -19,6 +19,7 @@ import contextlib
 import platform
 import itertools
 import subprocess
+from typing import TYPE_CHECKING
 import distutils.errors
 from typing import Dict, TYPE_CHECKING
 from setuptools.extern.more_itertools import unique_everseen

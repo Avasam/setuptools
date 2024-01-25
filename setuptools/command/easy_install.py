@@ -11,6 +11,7 @@ __ https://setuptools.pypa.io/en/latest/deprecated/easy_install.html
 """
 
 from glob import glob
+from typing import TYPE_CHECKING, Optional, Union
 from distutils.util import get_platform
 from distutils.util import convert_path, subst_vars
 from distutils.errors import (
@@ -81,7 +82,6 @@ from ..extern.jaraco.text import yield_lines
 
 if TYPE_CHECKING:
     _FileDescriptorOrPath = Union[int, str, bytes, os.PathLike[str], os.PathLike[bytes]]
-
 
 # Turn on PEP440Warnings
 warnings.filterwarnings("default", category=pkg_resources.PEP440Warning)
