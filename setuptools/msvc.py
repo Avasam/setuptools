@@ -19,10 +19,12 @@ import contextlib
 import platform
 import itertools
 import subprocess
+from typing import TYPE_CHECKING
 import distutils.errors
 from setuptools.extern.more_itertools import unique_everseen
 
-if platform.system() == 'Windows':
+# https://github.com/python/mypy/issues/8166
+if not TYPE_CHECKING and platform.system() == 'Windows':
     import winreg
     from os import environ
 else:

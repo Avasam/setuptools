@@ -19,7 +19,7 @@ if sys.platform.startswith('java'):
 else:
     _os = sys.modules[os.name]
 try:
-    _file = file
+    _file = file  # type: ignore[name-defined] # Check for global variable
 except NameError:
     _file = None
 _open = open
