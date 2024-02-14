@@ -21,6 +21,7 @@ import itertools
 import subprocess
 from typing import TYPE_CHECKING
 import distutils.errors
+from typing import Dict, TYPE_CHECKING
 from setuptools.extern.more_itertools import unique_everseen
 
 # https://github.com/python/mypy/issues/8166
@@ -36,7 +37,7 @@ else:
         HKEY_LOCAL_MACHINE = None
         HKEY_CLASSES_ROOT = None
 
-    environ = dict()
+    environ: Dict[str, str] = dict()
 
 
 def _msvc14_find_vc2015():
@@ -579,6 +580,7 @@ class RegistryInfo:
             finally:
                 if bkey:
                     closekey(bkey)
+        return None
 
 
 class SystemInfo:
@@ -825,6 +827,7 @@ class SystemInfo:
             return '8.1', '8.1a'
         elif self.vs_ver >= 14.0:
             return '10.0', '8.1'
+        return None
 
     @property
     def WindowsSdkLastVersion(self):
@@ -916,6 +919,8 @@ class SystemInfo:
             if execpath:
                 return execpath
 
+        return None
+
     @property
     def FSharpInstallDir(self):
         """
@@ -947,6 +952,8 @@ class SystemInfo:
             sdkdir = self.ri.lookup(self.ri.windows_kits_roots, 'kitsroot%s' % ver)
             if sdkdir:
                 return sdkdir or ''
+
+        return None
 
     @property
     def UniversalCRTSdkLastVersion(self):

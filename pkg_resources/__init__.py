@@ -71,8 +71,8 @@ from pkg_resources.extern.jaraco.text import (
     join_continuation,
 )
 
-from pkg_resources.extern import platformdirs
-from pkg_resources.extern import packaging
+from pkg_resources.extern import platformdirs  # type: ignore[attr-defined]
+from pkg_resources.extern import packaging  # type: ignore[attr-defined]
 
 __import__('pkg_resources.extern.packaging.version')
 __import__('pkg_resources.extern.packaging.specifiers')
@@ -1127,8 +1127,7 @@ class Environment:
         None is returned instead.  This method is a hook that allows subclasses
         to attempt other ways of obtaining a distribution before falling back
         to the `installer` argument."""
-        if installer is not None:
-            return installer(requirement)
+        return installer(requirement) if installer else None
 
     def __iter__(self):
         """Yield the unique project names of the available distributions"""
@@ -2833,9 +2832,7 @@ class Distribution:
 
     def _get_version(self):
         lines = self._get_metadata(self.PKG_INFO)
-        version = _version_from_file(lines)
-
-        return version
+        return _version_from_file(lines)
 
     def activate(self, path=None, replace=False):
         """Ensure distribution is importable on `path` (default=sys.path)"""
@@ -3210,6 +3207,7 @@ def _find_adapter(registry, ob):
     for t in types:
         if t in registry:
             return registry[t]
+    return None
 
 
 def ensure_directory(path):

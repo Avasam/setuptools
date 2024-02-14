@@ -10,7 +10,7 @@ import sys
 from contextlib import suppress
 from glob import iglob
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import Dict, List, MutableMapping, Optional, Set, Tuple
 
 import distutils.cmd
 import distutils.command
@@ -205,7 +205,7 @@ def check_packages(dist, attr, value):
 _Distribution = get_unpatched(distutils.core.Distribution)
 
 
-class Distribution(_Distribution):
+class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://github.com/python/mypy/issues/14458
     """Distribution with support for tests and package data
 
     This is an enhanced version of 'distutils.dist.Distribution' that
@@ -283,19 +283,19 @@ class Distribution(_Distribution):
                 dist._version = _normalization.safe_version(str(attrs['version']))
                 self._patched_dist = dist
 
-    def __init__(self, attrs=None):
+    def __init__(self, attrs: Optional[MutableMapping] = None) -> None:
         have_package_data = hasattr(self, "package_data")
         if not have_package_data:
-            self.package_data = {}
+            self.package_data: Dict[str, List[str]] = {}
         attrs = attrs or {}
-        self.dist_files = []
+        self.dist_files: List[Tuple[str, str, str]] = []
         # Filter-out setuptools' specific options.
         self.src_root = attrs.pop("src_root", None)
         self.patch_missing_pkg_info(attrs)
         self.dependency_links = attrs.pop('dependency_links', [])
         self.setup_requires = attrs.pop('setup_requires', [])
         for ep in metadata.entry_points(group='distutils.setup_keywords'):
-            vars(self).setdefault(ep.name, None)
+            vars(self).setdefault(ep.name, None)  # type: ignore[attr-defined]  # https://github.com/python/mypy/issues/14458
 
         metadata_only = set(self._DISTUTILS_UNSUPPORTED_METADATA)
         metadata_only -= {"install_requires", "extras_require"}
@@ -381,7 +381,7 @@ class Distribution(_Distribution):
             k: list(map(str, _reqs.parse(v or []))) for k, v in extras_require.items()
         }
 
-    def _finalize_license_files(self):
+    def _finalize_license_files(self) -> None:
         """Compute names of all license files which should be included."""
         license_files: Optional[List[str]] = self.metadata.license_files
         patterns: List[str] = license_files if license_files else []
@@ -394,7 +394,7 @@ class Distribution(_Distribution):
             # Default patterns match the ones wheel uses
             # See https://wheel.readthedocs.io/en/stable/user_guide.html
             # -> 'Including license files in the generated wheel file'
-            patterns = ('LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*')
+            patterns = ['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']
 
         self.metadata.license_files = list(
             unique_everseen(self._expand_patterns(patterns))
@@ -777,6 +777,8 @@ class Distribution(_Distribution):
         for p in self.iter_distribution_names():
             if p == package or p.startswith(pfx):
                 return True
+
+        return False
 
     def _exclude_misc(self, name, value):
         """Handle 'exclude()' for list/tuple attrs without a special handler"""

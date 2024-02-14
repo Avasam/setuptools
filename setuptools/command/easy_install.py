@@ -10,73 +10,70 @@ __ https://setuptools.pypa.io/en/latest/deprecated/easy_install.html
 
 """
 
-from glob import glob
-from typing import TYPE_CHECKING, Optional, Union
-from distutils.util import get_platform
-from distutils.util import convert_path, subst_vars
-from distutils.errors import (
-    DistutilsArgError,
-    DistutilsOptionError,
-    DistutilsError,
-    DistutilsPlatformError,
-)
-from distutils import log, dir_util
-from distutils.command.build_scripts import first_line_re
-from distutils.spawn import find_executable
-from distutils.command import install
-import sys
+import configparser
+import contextlib
+import io
 import os
-import zipimport
-import shutil
-import tempfile
-import zipfile
-import re
-import stat
 import random
+import re
+import shlex
+import shutil
+import site
+import stat
+import struct
+import subprocess
+import sys
+import sysconfig
+import tempfile
 import textwrap
 import warnings
-import site
-import struct
-import contextlib
-import subprocess
-import shlex
-import io
-import configparser
-import sysconfig
-
-
-from sysconfig import get_path
-
-from setuptools import Command
-from setuptools.sandbox import run_setup
-from setuptools.command import setopt
-from setuptools.archive_util import unpack_archive
-from setuptools.package_index import (
-    PackageIndex,
-    parse_requirement_arg,
-    URL_SCHEME,
+import zipfile
+import zipimport
+from distutils import dir_util, log
+from distutils.command import install
+from distutils.command.build_scripts import first_line_re
+from distutils.errors import (
+    DistutilsArgError,
+    DistutilsError,
+    DistutilsOptionError,
+    DistutilsPlatformError,
 )
-from setuptools.command import bdist_egg, egg_info
-from setuptools.warnings import SetuptoolsDeprecationWarning, SetuptoolsWarning
-from setuptools.wheel import Wheel
+from distutils.spawn import find_executable
+from distutils.util import convert_path, get_platform, subst_vars
+from glob import glob
+from sysconfig import get_path
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
+
+import pkg_resources
 from pkg_resources import (
+    DEVELOP_DIST,
+    Distribution,
+    DistributionNotFound,
+    EggMetadata,
+    Environment,
+    PathMetadata,
+    Requirement,
+    VersionConflict,
+    WorkingSet,
+    find_distributions,
+    get_distribution,
     normalize_path,
     resource_string,
-    get_distribution,
-    find_distributions,
-    Environment,
-    Requirement,
-    Distribution,
-    PathMetadata,
-    EggMetadata,
-    WorkingSet,
-    DistributionNotFound,
-    VersionConflict,
-    DEVELOP_DIST,
 )
-import pkg_resources
-from .. import py312compat
+from setuptools import Command
+from setuptools.archive_util import unpack_archive
+from setuptools.command import bdist_egg, egg_info, setopt
+from setuptools.package_index import (
+    URL_SCHEME,
+    PackageIndex,
+    parse_requirement_arg,
+)
+from setuptools.sandbox import run_setup
+from setuptools.warnings import SetuptoolsDeprecationWarning, SetuptoolsWarning
+from setuptools.wheel import Wheel
+
 from .._path import ensure_directory
+from ..compat import py311
 from ..extern.jaraco.text import yield_lines
 
 if TYPE_CHECKING:
@@ -744,6 +741,7 @@ class easy_install(Command):
             for dist in dists:
                 if dist in spec:
                     return dist
+        return None
 
     def select_scheme(self, name):
         try:
@@ -1476,9 +1474,7 @@ def get_site_dirs():
     with contextlib.suppress(AttributeError):
         sitedirs.extend(site.getsitepackages())
 
-    sitedirs = list(map(normalize_path, sitedirs))
-
-    return sitedirs
+    return list(map(normalize_path, sitedirs))
 
 
 def expand_paths(inputs):  # noqa: C901  # is too complex (11)  # FIXME
@@ -1769,7 +1765,7 @@ class RewritePthDistributions(PthDistributions):
 
 
 if os.environ.get('SETUPTOOLS_SYS_PATH_TECHNIQUE', 'raw') == 'rewrite':
-    PthDistributions = RewritePthDistributions
+    PthDistributions = RewritePthDistributions  # type: ignore[misc]  # Overwriting type
 
 
 def _first_line_re():
@@ -2043,8 +2039,8 @@ class CommandSpec(list):
     those passed to Popen.
     """
 
-    options = []
-    split_args = dict()
+    options: List[str] = []
+    split_args: Dict[str, bool] = dict()
 
     @classmethod
     def best(cls):
@@ -2339,7 +2335,7 @@ def load_launcher_manifest(name):
 
 
 def _rmtree(path, ignore_errors=False, onexc=auto_chmod):
-    return py312compat.shutil_rmtree(path, ignore_errors, onexc)
+    return py311.shutil_rmtree(path, ignore_errors, onexc)
 
 
 def current_umask():

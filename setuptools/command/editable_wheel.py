@@ -266,7 +266,7 @@ class editable_wheel(Command):
         self._run_install("data")
         return files, mapping
 
-    def _run_build_subcommands(self):
+    def _run_build_subcommands(self) -> None:
         """
         Issue #3501 indicates that some plugins/customizations might rely on:
 
@@ -600,7 +600,7 @@ def _simple_layout(
     layout = {pkg: find_package_path(pkg, package_dir, project_dir) for pkg in packages}
     if not layout:
         return set(package_dir) in ({}, {""})
-    parent = os.path.commonpath(starmap(_parent_path, layout.items()))
+    parent = os.path.commonpath(starmap(_parent_path, layout.items()))  # type: ignore[call-overload] # FIXME upstream
     return all(
         _path.same_path(Path(parent, *key.split('.')), value)
         for key, value in layout.items()

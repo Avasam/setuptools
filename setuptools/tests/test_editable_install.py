@@ -120,7 +120,7 @@ SETUP_SCRIPT_STUB = "__import__('setuptools').setup()"
 @pytest.mark.parametrize(
     "files",
     [
-        {**EXAMPLE, "setup.py": SETUP_SCRIPT_STUB},  # type: ignore
+        {**EXAMPLE, "setup.py": SETUP_SCRIPT_STUB},
         EXAMPLE,  # No setup.py script
     ],
 )
@@ -1180,7 +1180,7 @@ def test_debugging_tips(tmpdir_cwd, monkeypatch):
     simulated_failure = Mock(side_effect=SimulatedErr())
     monkeypatch.setattr(cmd, "get_finalized_command", simulated_failure)
 
-    expected_msg = "following steps are recommended to help debugging"
+    expected_msg = "following steps are recommended to help debug"
     with pytest.raises(SimulatedErr), pytest.warns(_DebuggingTips, match=expected_msg):
         cmd.run()
 
