@@ -1,3 +1,5 @@
+target-version = "py38"  # Oldest supported Python version
+
 [lint]
 ignore = [
 	# https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules

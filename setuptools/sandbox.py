@@ -9,7 +9,8 @@ import contextlib
 import pickle
 import textwrap
 import builtins
-from typing import Union, List
+from types import TracebackType
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import pkg_resources
 from distutils.errors import DistutilsError
@@ -123,7 +124,12 @@ class ExceptionSaver:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, exc, tb):
+    def __exit__(
+        self,
+        type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ):
         if not exc:
             return False
 
@@ -287,7 +293,12 @@ class AbstractSandbox:
         builtins.open = self._open
         self._active = True
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ):
         self._active = False
         if _file:
             builtins.file = _file
@@ -399,6 +410,38 @@ class AbstractSandbox:
             self._remap_input(operation + '-to', dst, *args, **kw),
         )
 
+    # Dynamically created
+    if TYPE_CHECKING:
+        if sys.platform == "win32":
+
+            def startfile(self, path, *args, **kw): ...
+        else:
+
+            def chown(self, path, *args, **kw): ...
+            def chroot(self, path, *args, **kw): ...
+            def lchown(self, path, *args, **kw): ...
+            def mkfifo(self, path, *args, **kw): ...
+            def mknod(self, path, *args, **kw): ...
+            def pathconf(self, path, *args, **kw): ...
+
+        def access(self, path, *args, **kw): ...
+        def chdir(self, path, *args, **kw): ...
+        def chmod(self, path, *args, **kw): ...
+        def getcwd(self, *args, **kw): ...
+        def link(self, src, dst, *args, **kw): ...
+        def listdir(self, path, *args, **kw): ...
+        def lstat(self, path, *args, **kw): ...
+        def mkdir(self, path, *args, **kw): ...
+        def open(self, path, *args, **kw): ...
+        def readlink(self, path, *args, **kw): ...
+        def remove(self, path, *args, **kw): ...
+        def rename(self, src, dst, *args, **kw): ...
+        def rmdir(self, path, *args, **kw): ...
+        def stat(self, path, *args, **kw): ...
+        def symlink(self, src, dst, *args, **kw): ...
+        def unlink(self, path, *args, **kw): ...
+        def utime(self, path, *args, **kw): ...
+
 
 if hasattr(os, 'devnull'):
     _EXCEPTIONS = [os.devnull]
@@ -491,7 +534,7 @@ class DirectorySandbox(AbstractSandbox):
             self._violation(operation, src, dst, *args, **kw)
         return (src, dst)
 
-    def open(self, file, flags, mode=0o777, *args, **kw):
+    def open(self, file, flags, mode: int = 0o777, *args, **kw):
         """Called for low-level os.open()"""
         if flags & WRITE_FLAGS and not self._ok(file):
             self._violation("os.open", file, flags, mode, *args, **kw)

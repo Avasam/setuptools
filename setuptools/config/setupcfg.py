@@ -30,6 +30,7 @@ from typing import (
     Union,
 )
 
+from ..dist import Distribution
 from ..errors import FileError, OptionError
 from ..extern.packaging.markers import default_environment as marker_env
 from ..extern.packaging.requirements import InvalidRequirement, Requirement
@@ -41,21 +42,20 @@ from . import expand
 if TYPE_CHECKING:
     from distutils.dist import DistributionMetadata  # noqa
 
-    from setuptools.dist import Distribution  # noqa
 
-_Path = Union[str, os.PathLike]
-SingleCommandOptions = Dict["str", Tuple["str", Any]]
+StrPath = Union[str, os.PathLike[str]]  # Same as _typeshed.StrPath
+SingleCommandOptions = Dict[str, Tuple[str, Any]]
 """Dict that associate the name of the options of a particular command to a
 tuple. The first element of the tuple indicates the origin of the option value
 (e.g. the name of the configuration file where it was read from),
 while the second element of the tuple is the option value itself
 """
-AllCommandOptions = Dict["str", SingleCommandOptions]  # cmd name => its options
-Target = TypeVar("Target", bound=Union["Distribution", "DistributionMetadata"])
+AllCommandOptions = Dict[str, SingleCommandOptions]  # cmd name => its options
+Target = TypeVar("Target", bound=Union[Distribution, "DistributionMetadata"])
 
 
 def read_configuration(
-    filepath: _Path, find_others=False, ignore_option_errors=False
+    filepath: StrPath, find_others: bool = False, ignore_option_errors: bool = False
 ) -> dict:
     """Read given configuration file and returns options from it as a dict.
 
@@ -72,15 +72,13 @@ def read_configuration(
 
     :rtype: dict
     """
-    from setuptools.dist import Distribution
-
     dist = Distribution()
     filenames = dist.find_config_files() if find_others else []
     handlers = _apply(dist, filepath, filenames, ignore_option_errors)
     return configuration_to_dict(handlers)
 
 
-def apply_configuration(dist: "Distribution", filepath: _Path) -> "Distribution":
+def apply_configuration(dist: Distribution, filepath: StrPath) -> Distribution:
     """Apply the configuration from a ``setup.cfg`` file into an existing
     distribution object.
     """
@@ -90,9 +88,9 @@ def apply_configuration(dist: "Distribution", filepath: _Path) -> "Distribution"
 
 
 def _apply(
-    dist: "Distribution",
-    filepath: _Path,
-    other_files: Iterable[_Path] = (),
+    dist: Distribution,
+    filepath: StrPath,
+    other_files: Iterable[StrPath] = (),
     ignore_option_errors: bool = False,
 ) -> Tuple["ConfigHandler", ...]:
     """Read configuration from ``filepath`` and applies to the ``dist`` object."""
@@ -131,7 +129,9 @@ def _get_option(target_obj: Target, key: str):
     return getter()
 
 
-def configuration_to_dict(handlers: Tuple["ConfigHandler", ...]) -> dict:
+def configuration_to_dict(
+    handlers: Tuple["ConfigHandler[Union[Distribution, DistributionMetadata]]", ...],
+) -> dict:
     """Returns configuration data gathered by given handlers as a dict.
 
     :param list[ConfigHandler] handlers: Handlers list,
@@ -150,9 +150,9 @@ def configuration_to_dict(handlers: Tuple["ConfigHandler", ...]) -> dict:
 
 
 def parse_configuration(
-    distribution: "Distribution",
+    distribution: Distribution,
     command_options: AllCommandOptions,
-    ignore_option_errors=False,
+    ignore_option_errors: bool = False,
 ) -> Tuple["ConfigMetadataHandler", "ConfigOptionsHandler"]:
     """Performs additional parsing of configuration options
     for a distribution.
@@ -371,7 +371,7 @@ class ConfigHandler(Generic[Target]):
 
         return parser
 
-    def _parse_file(self, value, root_dir: _Path):
+    def _parse_file(self, value, root_dir: StrPath):
         """Represents value as a string, allowing including text
         from nearest files using `file:` directive.
 
@@ -397,7 +397,7 @@ class ConfigHandler(Generic[Target]):
         self._referenced_files.update(filepaths)
         return expand.read_files(filepaths, root_dir)
 
-    def _parse_attr(self, value, package_dir, root_dir: _Path):
+    def _parse_attr(self, value, package_dir, root_dir: StrPath):
         """Represents value as a module attribute.
 
         Examples:
@@ -539,7 +539,7 @@ class ConfigMetadataHandler(ConfigHandler["DistributionMetadata"]):
         ignore_option_errors: bool,
         ensure_discovered: expand.EnsurePackagesDiscovered,
         package_dir: Optional[dict] = None,
-        root_dir: _Path = os.curdir,
+        root_dir: StrPath = os.curdir,
     ):
         super().__init__(target_obj, options, ignore_option_errors, ensure_discovered)
         self.package_dir = package_dir
@@ -593,12 +593,12 @@ class ConfigMetadataHandler(ConfigHandler["DistributionMetadata"]):
         return expand.version(self._parse_attr(value, self.package_dir, self.root_dir))
 
 
-class ConfigOptionsHandler(ConfigHandler["Distribution"]):
+class ConfigOptionsHandler(ConfigHandler[Distribution]):
     section_prefix = 'options'
 
     def __init__(
         self,
-        target_obj: "Distribution",
+        target_obj: Distribution,
         options: AllCommandOptions,
         ignore_option_errors: bool,
         ensure_discovered: expand.EnsurePackagesDiscovered,

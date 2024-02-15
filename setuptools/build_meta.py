@@ -26,6 +26,7 @@ bug reports or API stability):
 Again, this is not a formal definition! Just a "taste" of the module.
 """
 
+from collections.abc import Mapping
 import io
 import os
 import shlex
@@ -36,7 +37,7 @@ import contextlib
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Iterator, List, Optional, Union
 
 import setuptools
 import distutils
@@ -45,7 +46,6 @@ from ._path import same_path
 from ._reqs import parse_strings
 from .warnings import SetuptoolsDeprecationWarning
 from distutils.util import strtobool
-
 
 __all__ = [
     'get_requires_for_build_sdist',
@@ -140,7 +140,7 @@ def suppress_known_deprecation():
         yield
 
 
-_ConfigSettings = Optional[Dict[str, Union[str, List[str], None]]]
+_ConfigSettings = Optional[Mapping[str, Union[str, List[str], None]]]
 """
 Currently the user can run::
 
@@ -152,7 +152,8 @@ Currently the user can run::
 - build will accumulate values associated with repeated keys in a list.
   It will also accept keys with no associated value.
   This means that an option passed by build can be ``str | list[str] | None``.
-- PEP 517 specifies that ``config_settings`` is an optional dict.
+- PEP 517 specifies that ``config_settings`` is an optional `dict`.
+- using `Mapping` instead of `dict` for parameters covariance
 """
 
 
@@ -298,7 +299,7 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
 
         return requirements
 
-    def run_setup(self, setup_script='setup.py'):
+    def run_setup(self, setup_script: str = 'setup.py'):
         # Note that we can reuse our build directory between calls
         # Correctness comes first, then optimization later
         __file__ = os.path.abspath(setup_script)
@@ -321,10 +322,10 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
                 "setup-py-deprecated.html",
             )
 
-    def get_requires_for_build_wheel(self, config_settings=None):
+    def get_requires_for_build_wheel(self, config_settings: _ConfigSettings = None):
         return self._get_build_requires(config_settings, requirements=['wheel'])
 
-    def get_requires_for_build_sdist(self, config_settings=None):
+    def get_requires_for_build_sdist(self, config_settings: _ConfigSettings = None):
         return self._get_build_requires(config_settings, requirements=[])
 
     def _bubble_up_info_directory(self, metadata_directory: str, suffix: str) -> str:
@@ -352,7 +353,7 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
         raise errors.InternalError(msg)
 
     def prepare_metadata_for_build_wheel(
-        self, metadata_directory, config_settings=None
+        self, metadata_directory, config_settings: _ConfigSettings = None
     ):
         sys.argv = [
             *sys.argv[:1],
@@ -398,7 +399,10 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
         return result_basename
 
     def build_wheel(
-        self, wheel_directory, config_settings=None, metadata_directory=None
+        self,
+        wheel_directory,
+        config_settings: _ConfigSettings = None,
+        metadata_directory: Optional[str] = None,
     ):
         with suppress_known_deprecation():
             return self._build_with_temp_dir(
@@ -408,7 +412,7 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
                 config_settings,
             )
 
-    def build_sdist(self, sdist_directory, config_settings=None):
+    def build_sdist(self, sdist_directory, config_settings: _ConfigSettings = None):
         return self._build_with_temp_dir(
             ['sdist', '--formats', 'gztar'], '.tar.gz', sdist_directory, config_settings
         )
@@ -426,7 +430,10 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
         # get_requires_for_build_editable
         # prepare_metadata_for_build_editable
         def build_editable(
-            self, wheel_directory, config_settings=None, metadata_directory=None
+            self,
+            wheel_directory,
+            config_settings: _ConfigSettings = None,
+            metadata_directory: Optional[str] = None,
         ):
             # XXX can or should we hide our editable_wheel command normally?
             info_dir = self._get_dist_info_dir(metadata_directory)
@@ -437,11 +444,13 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
                     cmd, ".whl", wheel_directory, config_settings
                 )
 
-        def get_requires_for_build_editable(self, config_settings=None):
+        def get_requires_for_build_editable(
+            self, config_settings: _ConfigSettings = None
+        ):
             return self.get_requires_for_build_wheel(config_settings)
 
         def prepare_metadata_for_build_editable(
-            self, metadata_directory, config_settings=None
+            self, metadata_directory, config_settings: _ConfigSettings = None
         ):
             return self.prepare_metadata_for_build_wheel(
                 metadata_directory, config_settings

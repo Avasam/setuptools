@@ -3,6 +3,7 @@ import functools
 import distutils.core
 import distutils.errors
 import distutils.extension
+from typing import List, Optional, Tuple, Union
 
 from .monkey import get_unpatched
 
@@ -25,6 +26,9 @@ def _have_cython():
 have_pyrex = _have_cython
 
 _Extension = get_unpatched(distutils.core.Extension)
+_ExtensionArgsKwargs = Optional[
+    Union[str, bool, List[str], List[Optional[Tuple[str, str]]]]
+]  # TODO: Use explicit arguments
 
 
 class Extension(_Extension):  # type: ignore[valid-type, misc]  # https://github.com/python/mypy/issues/14458
@@ -123,11 +127,18 @@ class Extension(_Extension):  # type: ignore[valid-type, misc]  # https://github
       specified on Windows. (since v63)
     """
 
-    def __init__(self, name, sources, *args, **kw):
+    def __init__(
+        self,
+        name,
+        sources,
+        *args: _ExtensionArgsKwargs,
+        py_limited_api: bool = False,
+        **kw: _ExtensionArgsKwargs,
+    ):
         # The *args is needed for compatibility as calls may use positional
         # arguments. py_limited_api may be set only via keyword.
-        self.py_limited_api = kw.pop("py_limited_api", False)
-        super().__init__(name, sources, *args, **kw)
+        self.py_limited_api = py_limited_api
+        super().__init__(name, sources, *args, **kw)  # pyright: ignore[reportArgumentType] # See _ExtensionArgsKwargs TODO
 
     def _convert_pyx_sources_to_lang(self):
         """

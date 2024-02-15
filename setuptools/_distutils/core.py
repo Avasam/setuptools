@@ -144,12 +144,11 @@ def setup(**attrs):  # noqa: C901
     # Create the Distribution instance, using the remaining arguments
     # (ie. everything except distclass) to initialize it
     try:
+        print(klass)
         _setup_distribution = dist = klass(attrs)
+
     except DistutilsSetupError as msg:
-        if 'name' not in attrs:
-            raise SystemExit("error in setup command: %s" % msg)
-        else:
-            raise SystemExit("error in {} setup command: {}".format(attrs['name'], msg))
+        raise msg
 
     if _setup_stop_after == "init":
         return dist

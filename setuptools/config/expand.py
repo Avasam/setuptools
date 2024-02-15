@@ -37,12 +37,13 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
 )
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, TracebackType
 
 from distutils.errors import DistutilsOptionError
 
@@ -55,9 +56,9 @@ if TYPE_CHECKING:
     from distutils.dist import DistributionMetadata  # noqa
 
 chain_iter = chain.from_iterable
-_Path = Union[str, os.PathLike]
+StrPath = Union[str, os.PathLike[str]]  # Same as _typeshed.StrPath
 _K = TypeVar("_K")
-_V = TypeVar("_V", covariant=True)
+_VCo = TypeVar("_VCo", covariant=True)
 
 
 class StaticModule:
@@ -88,7 +89,7 @@ class StaticModule:
 
 
 def glob_relative(
-    patterns: Iterable[str], root_dir: Optional[_Path] = None
+    patterns: Iterable[str], root_dir: Optional[StrPath] = None
 ) -> List[str]:
     """Expand the list of glob patterns, but preserving relative paths.
 
@@ -120,7 +121,7 @@ def glob_relative(
     return expanded_values
 
 
-def read_files(filepaths: Union[str, bytes, Iterable[_Path]], root_dir=None) -> str:
+def read_files(filepaths: Union[str, Iterable[StrPath]], root_dir=None) -> str:
     """Return the content of the files concatenated using ``\n`` as str
 
     This function is sandboxed and won't reach anything outside ``root_dir``
@@ -138,7 +139,7 @@ def read_files(filepaths: Union[str, bytes, Iterable[_Path]], root_dir=None) -> 
     )
 
 
-def _filter_existing_files(filepaths: Iterable[_Path]) -> Iterator[_Path]:
+def _filter_existing_files(filepaths: Iterable[StrPath]) -> Iterator[StrPath]:
     for path in filepaths:
         if os.path.isfile(path):
             yield path
@@ -146,12 +147,12 @@ def _filter_existing_files(filepaths: Iterable[_Path]) -> Iterator[_Path]:
             SetuptoolsWarning.emit(f"File {path!r} cannot be found")
 
 
-def _read_file(filepath: Union[bytes, _Path]) -> str:
+def _read_file(filepath: Union[bytes, StrPath]) -> str:
     with open(filepath, encoding='utf-8') as f:
         return f.read()
 
 
-def _assert_local(filepath: _Path, root_dir: str):
+def _assert_local(filepath: StrPath, root_dir: str):
     if Path(os.path.abspath(root_dir)) not in Path(os.path.abspath(filepath)).parents:
         msg = f"Cannot access {filepath!r} (or anything outside {root_dir!r})"
         raise DistutilsOptionError(msg)
@@ -162,7 +163,7 @@ def _assert_local(filepath: _Path, root_dir: str):
 def read_attr(
     attr_desc: str,
     package_dir: Optional[Mapping[str, str]] = None,
-    root_dir: Optional[_Path] = None,
+    root_dir: Optional[StrPath] = None,
 ):
     """Reads the value of an attribute from a module.
 
@@ -197,7 +198,7 @@ def read_attr(
         return getattr(module, attr_name)
 
 
-def _find_spec(module_name: str, module_path: Optional[_Path]) -> ModuleSpec:
+def _find_spec(module_name: str, module_path: Optional[StrPath]) -> ModuleSpec:
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     spec = spec or importlib.util.find_spec(module_name)
 
@@ -218,8 +219,8 @@ def _load_spec(spec: ModuleSpec, module_name: str) -> ModuleType:
 
 
 def _find_module(
-    module_name: str, package_dir: Optional[Mapping[str, str]], root_dir: _Path
-) -> Tuple[_Path, Optional[str], str]:
+    module_name: str, package_dir: Optional[Mapping[str, str]], root_dir: StrPath
+) -> Tuple[StrPath, Optional[str], str]:
     """Given a module (that could normally be imported by ``module_name``
     after the build is complete), find the path to the parent directory where
     it is contained and the canonical name that could be used to import it
@@ -254,7 +255,7 @@ def _find_module(
 def resolve_class(
     qualified_class_name: str,
     package_dir: Optional[Mapping[str, str]] = None,
-    root_dir: Optional[_Path] = None,
+    root_dir: Optional[StrPath] = None,
 ) -> Callable:
     """Given a qualified class name, return the associated class object"""
     root_dir = root_dir or os.getcwd()
@@ -270,7 +271,7 @@ def resolve_class(
 def cmdclass(
     values: Dict[str, str],
     package_dir: Optional[Mapping[str, str]] = None,
-    root_dir: Optional[_Path] = None,
+    root_dir: Optional[StrPath] = None,
 ) -> Dict[str, Callable]:
     """Given a dictionary mapping command names to strings for qualified class
     names, apply :func:`resolve_class` to the dict values.
@@ -280,9 +281,9 @@ def cmdclass(
 
 def find_packages(
     *,
-    namespaces=True,
+    namespaces: bool = True,
     fill_package_dir: Optional[Dict[str, str]] = None,
-    root_dir: Optional[_Path] = None,
+    root_dir: Optional[StrPath] = None,
     **kwargs,
 ) -> List[str]:
     """Works similarly to :func:`setuptools.find_packages`, but with all
@@ -303,7 +304,7 @@ def find_packages(
     :rtype: list
     """
     from setuptools.discovery import construct_package_dir
-    from setuptools.extern.more_itertools import unique_everseen, always_iterable
+    from setuptools.extern.more_itertools import always_iterable, unique_everseen
 
     if namespaces:
         from setuptools.discovery import PEP420PackageFinder as PackageFinder
@@ -331,7 +332,7 @@ def find_packages(
     return packages
 
 
-def _nest_path(parent: _Path, path: _Path) -> str:
+def _nest_path(parent: StrPath, path: StrPath) -> str:
     path = parent if path in {".", ""} else os.path.join(parent, path)
     return os.path.normpath(path)
 
@@ -361,7 +362,7 @@ def canonic_package_data(package_data: dict) -> dict:
 
 
 def canonic_data_files(
-    data_files: Union[list, dict], root_dir: Optional[_Path] = None
+    data_files: Union[list, dict], root_dir: Optional[StrPath] = None
 ) -> List[Tuple[str, List[str]]]:
     """For compatibility with ``setup.py``, ``data_files`` should be a list
     of pairs instead of a dict.
@@ -377,7 +378,7 @@ def canonic_data_files(
     ]
 
 
-def entry_points(text: str, text_source="entry-points") -> Dict[str, dict]:
+def entry_points(text: str, text_source: str = "entry-points") -> Dict[str, dict]:
     """Given the contents of entry-points file,
     process it into a 2-level dictionary (``dict[str, dict[str, str]]``).
     The first level keys are entry-point groups, the second level keys are
@@ -415,7 +416,12 @@ class EnsurePackagesDiscovered:
     def __enter__(self):
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_value: Optional[BaseException],
+        _traceback: Optional[TracebackType],
+    ):
         if self._called:
             self._dist.set_defaults.analyse_name()  # Now we can set a default name
 
@@ -430,7 +436,7 @@ class EnsurePackagesDiscovered:
         return LazyMappingProxy(self._get_package_dir)
 
 
-class LazyMappingProxy(Mapping[_K, _V]):
+class LazyMappingProxy(Mapping[_K, _VCo]):
     """Mapping proxy that delays resolving the target object, until really needed.
 
     >>> def obtain_mapping():
@@ -444,16 +450,16 @@ class LazyMappingProxy(Mapping[_K, _V]):
     'other value'
     """
 
-    def __init__(self, obtain_mapping_value: Callable[[], Mapping[_K, _V]]):
+    def __init__(self, obtain_mapping_value: Callable[[], Mapping[_K, _VCo]]):
         self._obtain = obtain_mapping_value
-        self._value: Optional[Mapping[_K, _V]] = None
+        self._value: Optional[Mapping[_K, _VCo]] = None
 
-    def _target(self) -> Mapping[_K, _V]:
+    def _target(self) -> Mapping[_K, _VCo]:
         if self._value is None:
             self._value = self._obtain()
         return self._value
 
-    def __getitem__(self, key: _K) -> _V:
+    def __getitem__(self, key: _K) -> _VCo:
         return self._target()[key]
 
     def __len__(self) -> int:

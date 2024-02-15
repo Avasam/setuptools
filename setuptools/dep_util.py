@@ -1,5 +1,11 @@
+from typing import TYPE_CHECKING
+
 from ._distutils import _modified
 from .warnings import SetuptoolsDeprecationWarning
+
+if TYPE_CHECKING:
+    from ._distutils._modified import newer_group as newer_group
+    from ._distutils._modified import newer_pairwise_group as newer_pairwise_group
 
 
 def __getattr__(name):

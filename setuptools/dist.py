@@ -1,6 +1,7 @@
 __all__ = ['Distribution']
 
 
+from collections.abc import Iterable
 import io
 import itertools
 import numbers
@@ -10,7 +11,7 @@ import sys
 from contextlib import suppress
 from glob import iglob
 from pathlib import Path
-from typing import Dict, List, MutableMapping, Optional, Set, Tuple
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Set, Tuple, Union
 
 import distutils.cmd
 import distutils.command
@@ -37,7 +38,6 @@ from .config import setupcfg, pyprojecttoml
 from .discovery import ConfigDiscovery
 from .monkey import get_unpatched
 from .warnings import InformationOnly, SetuptoolsDeprecationWarning
-
 
 sequence = tuple, list
 
@@ -269,7 +269,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
 
     _patched_dist = None
 
-    def patch_missing_pkg_info(self, attrs):
+    def patch_missing_pkg_info(self, attrs: Mapping[str, Any]):
         # Fake up a replacement for the data that would normally come from
         # PKG-INFO, but which might not yet be built if this is a fresh
         # checkout.
@@ -283,17 +283,17 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
                 dist._version = _normalization.safe_version(str(attrs['version']))
                 self._patched_dist = dist
 
-    def __init__(self, attrs: Optional[MutableMapping] = None) -> None:
+    def __init__(self, attrs: Optional[MutableMapping[str, Any]] = None) -> None:
         have_package_data = hasattr(self, "package_data")
         if not have_package_data:
             self.package_data: Dict[str, List[str]] = {}
         attrs = attrs or {}
         self.dist_files: List[Tuple[str, str, str]] = []
         # Filter-out setuptools' specific options.
-        self.src_root = attrs.pop("src_root", None)
+        self.src_root: Optional[str] = attrs.pop("src_root", None)
         self.patch_missing_pkg_info(attrs)
-        self.dependency_links = attrs.pop('dependency_links', [])
-        self.setup_requires = attrs.pop('setup_requires', [])
+        self.dependency_links: list[str] = attrs.pop('dependency_links', [])
+        self.setup_requires: list[str] = attrs.pop('setup_requires', [])
         for ep in metadata.entry_points(group='distutils.setup_keywords'):
             vars(self).setdefault(ep.name, None)  # type: ignore[attr-defined]  # https://github.com/python/mypy/issues/14458
 
@@ -495,7 +495,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
             except ValueError as e:
                 raise DistutilsOptionError(e) from e
 
-    def warn_dash_deprecation(self, opt, section):
+    def warn_dash_deprecation(self, opt: str, section: str):
         if section in (
             'options.extras_require',
             'options.data_files',
@@ -536,7 +536,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
             # during bootstrapping, distribution doesn't exist
             return []
 
-    def make_option_lowercase(self, opt, section):
+    def make_option_lowercase(self, opt: str, section: str):
         if section != 'metadata' or opt.islower():
             return opt
 
@@ -612,7 +612,11 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
             tomlfiles = [standard_project_metadata]
         return filenames, tomlfiles
 
-    def parse_config_files(self, filenames=None, ignore_option_errors=False):
+    def parse_config_files(
+        self,
+        filenames: Optional[Iterable[str]] = None,
+        ignore_option_errors: bool = False,
+    ):
         """Parses configuration files from various levels
         and loads configuration.
         """
@@ -629,7 +633,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
         self._finalize_requires()
         self._finalize_license_files()
 
-    def fetch_build_eggs(self, requires):
+    def fetch_build_eggs(self, requires: Union[str, Iterable[str]]):
         """Resolve pre-setup requirements"""
         from .installer import _fetch_build_eggs
 
@@ -700,7 +704,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
 
         return fetch_build_egg(self, req)
 
-    def get_command_class(self, command):
+    def get_command_class(self, command: str):
         """Pluggable version of get_command_class()"""
         if command in self.cmdclass:
             return self.cmdclass[command]
@@ -748,7 +752,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
             else:
                 self._include_misc(k, v)
 
-    def exclude_package(self, package):
+    def exclude_package(self, package: str):
         """Remove packages, modules, and extensions in named package"""
 
         pfx = package + '.'
@@ -769,7 +773,7 @@ class Distribution(_Distribution):  # type: ignore[valid-type, misc]  # https://
                 if p.name != package and not p.name.startswith(pfx)
             ]
 
-    def has_contents_for(self, package):
+    def has_contents_for(self, package: str):
         """Return true if 'exclude_package(package)' would do something"""
 
         pfx = package + '.'

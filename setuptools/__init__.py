@@ -3,11 +3,15 @@
 import functools
 import os
 import re
-
+from collections.abc import Mapping, Sequence
 import _distutils_hack.override  # noqa: F401
 import distutils.core
 from distutils.errors import DistutilsOptionError
 from distutils.util import convert_path as _convert_path
+from typing import Any, List, Tuple, Type, Union, TypedDict
+
+from typing_extensions import Unpack
+
 
 from . import logging, monkey
 from . import version as _version_module
@@ -96,11 +100,66 @@ def _fetch_build_eggs(dist):
         raise
 
 
-def setup(**attrs):
+class SetupKeywords(TypedDict, total=False):
+    """https://setuptools.pypa.io/en/latest/references/keywords.html"""
+
+    name: str
+    version: str
+    description: str
+    long_description: str
+    long_description_content_type: str
+    author: str
+    author_email: str
+    maintainer: str
+    maintainer_email: str
+    url: str
+    download_url: str
+    packages: Sequence[str]
+    py_modules: Sequence[str]
+    scripts: Sequence[str]
+    ext_package: str
+    ext_modules: Sequence[Extension]
+    classifiers: Union[str, List[str]]  # can be comma-separated list string
+    distclass: Type[Distribution]
+    script_name: str
+    script_args: Sequence[str]
+    options: Mapping[str, Any]
+    license: str
+    license_file: str  # deprecated by license_files
+    license_files: Sequence[str]
+    keywords: Union[str, List[str]]  # can be comma-separated list string
+    platforms: Union[str, List[str]]  # can be comma-separated list string
+    cmdclass: "Mapping[str, Type[Command]]"
+    data_files: Sequence[Tuple[str, Sequence[str]]]  # DISCOURAGED
+    package_dir: Mapping[str, str]
+    requires: Sequence[str]  # superseded by install_requires
+    obsoletes: Sequence[str]  # ignored by pip
+    provides: Sequence[str]  # ignored by pip
+    include_package_data: bool
+    exclude_package_data: Mapping[str, Sequence[str]]
+    package_data: Mapping[str, Sequence[str]]
+    zip_safe: bool
+    install_requires: Union[str, Sequence[str]]
+    entry_points: Mapping[str, Union[str, Sequence[str]]]
+    extras_require: Mapping[str, Union[str, Sequence[str]]]
+    python_requires: str
+    setup_requires: Sequence[str]  # discouraged in favor of PEP 518
+    dependency_links: Sequence[str]  # deprecated. Not supported anymore by pip
+    namespace_packages: Sequence[
+        str
+    ]  # deprecated in favor of native/implicit namespaces (PEP 420)
+    test_suite: str  # Deprecated since version 41.5.0
+    tests_require: Union[str, Sequence[str]]  # Deprecated since version 41.5.0
+    test_loader: str  # Deprecated since version 41.5.0
+    eager_resources: Sequence[str]
+    project_urls: Mapping[str, str]
+
+
+def setup(**attrs: Unpack[SetupKeywords]):
     # Make sure we have any requirements needed to interpret 'attrs'.
     logging.configure()
     _install_setup_requires(attrs)
-    return distutils.core.setup(**attrs)
+    return distutils.core.setup(**attrs)  # pyright: ignore[reportArgumentType] # setuptools supports more than distutils did
 
 
 setup.__doc__ = distutils.core.setup.__doc__

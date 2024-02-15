@@ -16,7 +16,6 @@ from distutils.core import run_setup
 import jaraco.envs
 import jaraco.path
 import pytest
-from path import Path as _Path
 
 from . import contexts, namespaces
 
@@ -925,7 +924,7 @@ class TestLinkTree:
     def test_generated_tree(self, tmp_path):
         jaraco.path.build(self.FILES, prefix=tmp_path)
 
-        with _Path(tmp_path):
+        with Path(tmp_path):
             name = "mypkg-3.14159"
             dist = Distribution({"script_name": "%PEP 517%"})
             dist.parse_config_files()

@@ -55,8 +55,11 @@ from .build_py import build_py as build_py_cls
 if TYPE_CHECKING:
     from wheel.wheelfile import WheelFile  # noqa
 
-_Path = Union[str, Path]
-_P = TypeVar("_P", bound=_Path)
+StrPath = Union[str, os.PathLike[str]]  # Same as _typeshed.StrPath
+StrOrBytesPath = Union[
+    str, bytes, os.PathLike[str], os.PathLike[bytes]
+]  # Same as _typeshed.StrOrBytesPath
+_P = TypeVar("_P", bound=StrOrBytesPath)
 _logger = logging.getLogger(__name__)
 
 
@@ -181,7 +184,7 @@ class editable_wheel(Command):
         return next(candidates, None)
 
     def _configure_build(
-        self, name: str, unpacked_wheel: _Path, build_lib: _Path, tmp_dir: _Path
+        self, name: str, unpacked_wheel: StrPath, build_lib: StrPath, tmp_dir: StrPath
     ):
         """Configure commands to behave in the following ways:
 
@@ -256,7 +259,11 @@ class editable_wheel(Command):
         return files, mapping
 
     def _run_build_commands(
-        self, dist_name: str, unpacked_wheel: _Path, build_lib: _Path, tmp_dir: _Path
+        self,
+        dist_name: str,
+        unpacked_wheel: StrPath,
+        build_lib: StrPath,
+        tmp_dir: StrPath,
     ) -> Tuple[List[str], Dict[str, str]]:
         self._configure_build(dist_name, unpacked_wheel, build_lib, tmp_dir)
         self._run_build_subcommands()
@@ -354,7 +361,7 @@ class editable_wheel(Command):
         self,
         name: str,
         tag: str,
-        build_lib: _Path,
+        build_lib: StrPath,
     ) -> "EditableStrategy":
         """Decides which strategy to use to implement an editable installation."""
         build_name = f"__editable__.{name}-{tag}"
@@ -424,8 +431,8 @@ class _LinkTree(_StaticPth):
         self,
         dist: Distribution,
         name: str,
-        auxiliary_dir: _Path,
-        build_lib: _Path,
+        auxiliary_dir: StrPath,
+        build_lib: StrPath,
     ):
         self.auxiliary_dir = Path(auxiliary_dir)
         self.build_lib = Path(build_lib).resolve()
@@ -649,7 +656,7 @@ def _find_top_level_modules(dist: Distribution) -> Iterator[str]:
 def _find_package_roots(
     packages: Iterable[str],
     package_dir: Mapping[str, str],
-    src_root: _Path,
+    src_root: StrPath,
 ) -> Dict[str, str]:
     pkg_roots: Dict[str, str] = {
         pkg: _absolute_root(find_package_path(pkg, package_dir, src_root))
@@ -659,7 +666,7 @@ def _find_package_roots(
     return _remove_nested(pkg_roots)
 
 
-def _absolute_root(path: _Path) -> str:
+def _absolute_root(path: StrPath) -> str:
     """Works for packages and top-level modules"""
     path_ = Path(path)
     parent = path_.parent

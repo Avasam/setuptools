@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Union
 
-_Path = Union[str, os.PathLike]
+StrPath = Union[str, os.PathLike[str]]  # Same as _typeshed.StrPath
 
 
 def ensure_directory(path):
@@ -11,7 +11,7 @@ def ensure_directory(path):
     os.makedirs(dirname, exist_ok=True)
 
 
-def same_path(p1: _Path, p2: _Path) -> bool:
+def same_path(p1: StrPath, p2: StrPath) -> bool:
     """Differs from os.path.samefile because it does not require paths to exist.
     Purely string based (no comparison between i-nodes).
     >>> same_path("a/b", "./a/b")
@@ -30,7 +30,7 @@ def same_path(p1: _Path, p2: _Path) -> bool:
     return normpath(p1) == normpath(p2)
 
 
-def normpath(filename: _Path) -> str:
+def normpath(filename: StrPath) -> str:
     """Normalize a file/dir name for comparison purposes."""
     # See pkg_resources.normalize_path for notes about cygwin
     file = os.path.abspath(filename) if sys.platform == 'cygwin' else filename
