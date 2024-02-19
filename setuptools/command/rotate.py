@@ -3,7 +3,7 @@ from distutils import log
 from distutils.errors import DistutilsOptionError
 import os
 import shutil
-from typing import List
+from typing import ClassVar, List
 
 from setuptools import Command
 
@@ -18,7 +18,7 @@ class rotate(Command):
         ('keep=', 'k', "number of matching distributions to keep"),
     ]
 
-    boolean_options: List[str] = []
+    boolean_options: ClassVar[List[str]] = []
 
     def initialize_options(self):
         self.match = None

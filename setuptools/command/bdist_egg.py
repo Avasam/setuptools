@@ -428,7 +428,14 @@ def can_scan():
 INSTALL_DIRECTORY_ATTRS = ['install_lib', 'install_dir', 'install_data', 'install_base']
 
 
-def make_zipfile(zip_filename, base_dir, verbose=0, dry_run=0, compress=True, mode='w'):
+def make_zipfile(
+    zip_filename,
+    base_dir,
+    verbose: int = 0,
+    dry_run: int = 0,
+    compress: bool = True,
+    mode: str = 'w',
+):
     """Create a zip file from all the files under 'base_dir'.  The output
     zip file will be named 'base_dir' + ".zip".  Uses either the "zipfile"
     Python module (if available) or the InfoZIP "zip" utility (if installed

@@ -22,6 +22,7 @@ from inspect import cleandoc
 from itertools import chain, starmap
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Dict,
@@ -32,6 +33,7 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -386,12 +388,17 @@ class editable_wheel(Command):
 
 class EditableStrategy(Protocol):
     def __call__(
-        self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]
+        self, wheel: "WheelFile", files: Iterable[str], mapping: Dict[str, str]
     ): ...
 
     def __enter__(self): ...
 
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_value: Optional[BaseException],
+        _traceback: Optional[TracebackType],
+    ): ...
 
 
 class _StaticPth:
@@ -400,7 +407,9 @@ class _StaticPth:
         self.name = name
         self.path_entries = path_entries
 
-    def __call__(self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]):
+    def __call__(
+        self, wheel: "WheelFile", files: Iterable[str], mapping: Dict[str, str]
+    ):
         entries = "\n".join(str(p.resolve()) for p in self.path_entries)
         contents = _encode_pth(f"{entries}\n")
         wheel.writestr(f"__editable__.{self.name}.pth", contents)
@@ -413,7 +422,12 @@ class _StaticPth:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_value: Optional[BaseException],
+        _traceback: Optional[TracebackType],
+    ): ...
 
 
 class _LinkTree(_StaticPth):
@@ -439,7 +453,9 @@ class _LinkTree(_StaticPth):
         self._file = dist.get_command_obj("build_py").copy_file
         super().__init__(dist, name, [self.auxiliary_dir])
 
-    def __call__(self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]):
+    def __call__(
+        self, wheel: "WheelFile", files: Iterable[str], mapping: Dict[str, str]
+    ):
         self._create_links(files, mapping)
         super().__call__(wheel, files, mapping)
 
@@ -475,7 +491,12 @@ class _LinkTree(_StaticPth):
         _logger.warning(msg + _STRICT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_value: Optional[BaseException],
+        _traceback: Optional[TracebackType],
+    ):
         msg = f"""\n
         Strict editable installation performed using the auxiliary directory:
             {self.auxiliary_dir}
@@ -491,7 +512,9 @@ class _TopLevelFinder:
         self.dist = dist
         self.name = name
 
-    def __call__(self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]):
+    def __call__(
+        self, wheel: "WheelFile", files: Iterable[str], mapping: Dict[str, str]
+    ):
         src_root = self.dist.src_root or os.curdir
         top_level = chain(_find_packages(self.dist), _find_top_level_modules(self.dist))
         package_dir = self.dist.package_dir or {}
@@ -527,7 +550,12 @@ class _TopLevelFinder:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_value: Optional[BaseException],
+        _traceback: Optional[TracebackType],
+    ):
         msg = """\n
         Please be careful with folders in your working directory with the same
         name as your package as they may take precedence during imports.
@@ -574,7 +602,7 @@ def _can_symlink_files(base_dir: Path) -> bool:
 
 
 def _simple_layout(
-    packages: Iterable[str], package_dir: Dict[str, str], project_dir: Path
+    packages: Iterable[str], package_dir: Mapping[str, str], project_dir: Path
 ) -> bool:
     """Return ``True`` if:
     - all packages are contained by the same parent directory, **and**
@@ -677,7 +705,7 @@ def _absolute_root(path: StrPath) -> str:
         return str(parent.resolve() / path_.name)
 
 
-def _find_virtual_namespaces(pkg_roots: Dict[str, str]) -> Iterator[str]:
+def _find_virtual_namespaces(pkg_roots: Mapping[str, str]) -> Iterator[str]:
     """By carefully designing ``package_dir``, it is possible to implement the logical
     structure of PEP 420 in a package without the corresponding directories.
 
@@ -702,7 +730,7 @@ def _find_virtual_namespaces(pkg_roots: Dict[str, str]) -> Iterator[str]:
 
 
 def _find_namespaces(
-    packages: List[str], pkg_roots: Dict[str, str]
+    packages: Iterable[str], pkg_roots: Mapping[str, str]
 ) -> Iterator[Tuple[str, List[str]]]:
     for pkg in packages:
         path = find_package_path(pkg, pkg_roots, "")

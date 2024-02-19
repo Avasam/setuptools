@@ -4,13 +4,14 @@ from distutils.errors import DistutilsOptionError
 import distutils
 import os
 import configparser
+from typing import Literal
 
 from setuptools import Command
 
 __all__ = ['config_file', 'edit_config', 'option_base', 'setopt']
 
 
-def config_file(kind="local"):
+def config_file(kind: Literal["local", "global", "user"] = "local"):
     """Get the filename of the distutils, local, global, or per-user config
 
     `kind` must be one of "local", "global", or "user"
@@ -25,7 +26,7 @@ def config_file(kind="local"):
     raise ValueError("config_file() type must be 'local', 'global', or 'user'", kind)
 
 
-def edit_config(filename, settings, dry_run=False):
+def edit_config(filename, settings, dry_run: bool = False):
     """Edit a configuration file to include `settings`
 
     `settings` is a dictionary of dictionaries or ``None`` values, keyed by

@@ -14,7 +14,6 @@ from setuptools.errors import BaseError
 from setuptools.extension import Extension, Library
 
 if TYPE_CHECKING:
-    from setuptools.dist import Distribution
     from distutils.command.build_ext import build_ext as _build_ext
 else:
     try:
@@ -85,7 +84,6 @@ def get_abi3_suffix():
 class build_ext(_build_ext):
     editable_mode: bool = False
     inplace: bool = False
-    distribution: "Distribution"
 
     def run(self):
         """Build extensions in build directory, then copy if --inplace"""
@@ -335,7 +333,7 @@ class build_ext(_build_ext):
         if self.get_finalized_command('build_py').optimize:
             yield '.pyo'
 
-    def write_stub(self, output_dir, ext, compile=False):
+    def write_stub(self, output_dir, ext, compile: bool = False):
         stub_file = os.path.join(output_dir, *ext._full_name.split('.')) + '.py'
         self._write_stub_file(stub_file, ext, compile)
 
@@ -403,7 +401,7 @@ if use_stubs or os.name == 'nt':
         library_dirs=None,
         runtime_library_dirs=None,
         export_symbols=None,
-        debug=0,
+        debug: int = 0,
         extra_preargs=None,
         extra_postargs=None,
         build_temp=None,

@@ -10,7 +10,7 @@ from .build import _ORIGINAL_SUBCOMMANDS
 _default_revctrl = list
 
 
-def walk_revctrl(dirname=''):
+def walk_revctrl(dirname: str = ''):
     """Find all files under revision control"""
     for ep in metadata.entry_points(group='setuptools.file_finders'):
         yield from ep.load()(dirname)

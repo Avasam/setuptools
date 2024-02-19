@@ -1,8 +1,11 @@
+from collections.abc import Callable
 import os
 import operator
 import sys
 import contextlib
 import itertools
+from types import ModuleType
+from typing import Generic, Optional, TypeVar
 import unittest
 from distutils.errors import DistutilsError, DistutilsOptionError
 from distutils import log
@@ -22,13 +25,15 @@ from setuptools import Command
 from setuptools.extern.more_itertools import unique_everseen
 from setuptools.extern.jaraco.functools import pass_none
 
+_T = TypeVar("_T")
+
 
 class ScanningLoader(TestLoader):
     def __init__(self):
         TestLoader.__init__(self)
         self._visited = set()
 
-    def loadTestsFromModule(self, module, pattern=None):
+    def loadTestsFromModule(self, module: ModuleType, pattern=None):
         """Return a suite of all tests cases contained in the given module
 
         If the module is a package, load tests from all the modules in it.
@@ -63,11 +68,11 @@ class ScanningLoader(TestLoader):
 
 
 # adapted from jaraco.classes.properties:NonDataProperty
-class NonDataProperty:
-    def __init__(self, fget):
+class NonDataProperty(Generic[_T]):
+    def __init__(self, fget: Callable[..., _T]):
         self.fget = fget
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj, objtype: Optional[type] = None):
         if obj is None:
             return self
         return self.fget(obj)

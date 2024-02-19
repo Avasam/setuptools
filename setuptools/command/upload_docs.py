@@ -50,7 +50,8 @@ class upload_docs(upload):
             and metadata.entry_points(group='distutils.commands', name='build_sphinx')
         )
 
-    sub_commands = [('build_sphinx', has_sphinx)]  # type: ignore[list-item] # distutils stubs issue w/ Python 3.12
+    # distutils stubs issue where the parent type "Command" is seen as a different source than in setuptools
+    sub_commands = [('build_sphinx', has_sphinx)]  # type: ignore[list-item]
 
     def initialize_options(self):
         upload.initialize_options(self)

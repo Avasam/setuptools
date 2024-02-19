@@ -87,10 +87,10 @@ class install_lib(orig.install_lib):
         self,
         infile,
         outfile,
-        preserve_mode=1,
-        preserve_times=1,
-        preserve_symlinks=0,
-        level=1,
+        preserve_mode: int = 1,
+        preserve_times: int = 1,
+        preserve_symlinks: int = 0,
+        level: int = 1,
     ):
         assert preserve_mode and preserve_times and not preserve_symlinks
         exclude = self.get_exclusions()
