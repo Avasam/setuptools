@@ -41,6 +41,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    BinaryIO,
 )
 import zipfile
 import zipimport
@@ -115,6 +116,20 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2,
 )
+
+if TYPE_CHECKING:
+    # Used for a protocol method return type
+    class _IResourceStream(io.BufferedIOBase, BinaryIO, Protocol): ...  # type: ignore[misc] # pyright: ignore
+else:
+
+    class _IResourceStream(Protocol): ...
+
+
+# Same as types._LoaderProtocol
+class _LoaderProtocol(Protocol):
+    def load_module(self, __fullname: str) -> types.ModuleType: ...
+
+
 # Type aliases
 StrPath = Union[str, os.PathLike[str]]  # Same as _typeshed.StrPath
 _T = TypeVar("_T")
@@ -124,17 +139,11 @@ _InstallerType = Callable[["Requirement"], Optional["Distribution"]]
 _EPDistType = Union["Distribution", "Requirement", str]
 _MetadataType = Optional["IResourceProvider"]
 _PkgReqType = Union[str, "Requirement"]
-_DistFinderType = Callable[[types._LoaderProtocol, str, bool], Iterator["Distribution"]]
-_NSHandlerType = Callable[
-    [types._LoaderProtocol, str, str, types.ModuleType], Optional[str]
-]
+_DistFinderType = Callable[[_LoaderProtocol, str, bool], Iterator["Distribution"]]
+_NSHandlerType = Callable[[_LoaderProtocol, str, str, types.ModuleType], Optional[str]]
 # Any object works, but let's indicate we something like a module (optionally has __loader__ or __file__)
 _ModuleLike = Union[object, types.ModuleType]
 _ZipManifestDict = Dict[str, zipfile.ZipInfo]
-
-
-# Used for a protocol method return type
-class _IResourceStream(io.BufferedIOBase, io.BinaryIO, Protocol): ...  # type: ignore[misc] # pyright: ignore
 
 
 # declare some globals that will be defined later to
@@ -591,7 +600,7 @@ class IResourceProvider(IMetadataProvider, Protocol):
         `manager` must be an ``IResourceManager``"""
 
     def get_resource_string(self, manager: "ResourceManager", resource_name: str):
-        """Return a string containing the contents of `resource_name`
+        """Return a byte string containing the contents of `resource_name`
 
         `manager` must be an ``IResourceManager``"""
 
@@ -1526,7 +1535,7 @@ class NullProvider:
 
     egg_name: Optional[str] = None
     egg_info: Optional[str] = None
-    loader: Optional[types._LoaderProtocol] = None
+    loader: Optional[_LoaderProtocol] = None
     module_path: Optional[str]  # Some subclasses can have a None module_path
 
     def __init__(self, module: _ModuleLike):
@@ -2154,7 +2163,7 @@ register_finder(zipimport.zipimporter, find_eggs_in_zip)
 
 
 def find_nothing(
-    importer: Optional[types._LoaderProtocol],
+    importer: Optional[_LoaderProtocol],
     path_item: Optional[str],
     only: Optional[bool] = False,
 ):
@@ -2164,7 +2173,7 @@ def find_nothing(
 register_finder(object, find_nothing)
 
 
-def find_on_path(importer: Optional[types._LoaderProtocol], path_item, only=False):
+def find_on_path(importer: Optional[_LoaderProtocol], path_item, only=False):
     """Yield distributions accessible on a sys.path directory"""
     path_item = _normalize_cached(path_item)
 
@@ -2431,7 +2440,7 @@ def fixup_namespace_packages(path_item: str, parent: Optional[str] = None):
 
 
 def file_ns_handler(
-    importer: Optional[types._LoaderProtocol],
+    importer: Optional[_LoaderProtocol],
     path_item,
     packageName,
     module: types.ModuleType,
@@ -2456,7 +2465,7 @@ register_namespace_handler(importlib.machinery.FileFinder, file_ns_handler)
 
 
 def null_ns_handler(
-    importer: Optional[types._LoaderProtocol],
+    importer: Optional[_LoaderProtocol],
     path_item: Optional[str],
     packageName: Optional[str],
     module: Optional[_ModuleLike],
