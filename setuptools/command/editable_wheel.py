@@ -538,7 +538,8 @@ def _encode_pth(content: str) -> bytes:
     This function tries to simulate this behaviour without having to create an
     actual file, in a way that supports a range of active Python versions.
     (There seems to be some variety in the way different version of Python handle
-    ``encoding=None``, not all of them use ``locale.getpreferredencoding(False)``).
+    ``encoding=None``, not all of them use ``locale.getpreferredencoding(False)``
+    or ``locale.getencoding()``).
     """
     encoding = "locale" if sys.version_info >= (3, 10) else None
     with io.BytesIO() as buffer:
