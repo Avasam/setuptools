@@ -17,6 +17,11 @@ from .dist import Distribution
 from .extension import Extension
 from .warnings import SetuptoolsDeprecationWarning
 
+
+print(
+
+            "Fail tests on purpose"
+)
 __all__ = [
     'setup',
     'Distribution',
