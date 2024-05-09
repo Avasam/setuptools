@@ -1,5 +1,8 @@
+from importlib.machinery import ModuleSpec
 import importlib.util
 import sys
+from types import ModuleType
+from typing import Generator, Iterable, Optional, Sequence
 
 
 class VendorImporter:
@@ -8,13 +11,18 @@ class VendorImporter:
     or otherwise naturally-installed packages from root_name.
     """
 
-    def __init__(self, root_name, vendored_names=(), vendor_pkg=None):
+    def __init__(
+        self,
+        root_name: str,
+        vendored_names: Iterable[str] = (),
+        vendor_pkg: Optional[str] = None,
+    ) -> None:
         self.root_name = root_name
         self.vendored_names = set(vendored_names)
         self.vendor_pkg = vendor_pkg or root_name.replace('extern', '_vendor')
 
     @property
-    def search_path(self):
+    def search_path(self) -> Generator[str, None, None]:
         """
         Search first the vendor package then as a natural package.
         """
@@ -26,7 +34,7 @@ class VendorImporter:
         root, base, target = fullname.partition(self.root_name + '.')
         return not root and any(map(target.startswith, self.vendored_names))
 
-    def load_module(self, fullname):
+    def load_module(self, fullname: str) -> ModuleType:
         """
         Iterate over the search path to locate and load fullname.
         """
@@ -48,21 +56,27 @@ class VendorImporter:
                 "distribution.".format(**locals())
             )
 
-    def create_module(self, spec):
+    def create_module(self, spec: ModuleSpec) -> ModuleType:
         return self.load_module(spec.name)
 
-    def exec_module(self, module):
+    def exec_module(self, module: ModuleType) -> None:
         pass
 
-    def find_spec(self, fullname, path=None, target=None):
+    def find_spec(
+        self,
+        fullname: str,
+        path: Optional[Sequence[str]] = None,
+        target: Optional[ModuleType] = None,
+    ) -> Optional[ModuleSpec]:
         """Return a module spec for vendored names."""
         return (
-            importlib.util.spec_from_loader(fullname, self)
+            # FIXME: VendorImporter doesn't subclass importlib.abc.Loader
+            importlib.util.spec_from_loader(fullname, self)  # type: ignore[arg-type]
             if self._module_matches_namespace(fullname)
             else None
         )
 
-    def install(self):
+    def install(self) -> None:
         """
         Install this importer into sys.meta_path if not already present.
         """
