@@ -1,5 +1,7 @@
 """Extensions to the 'distutils' for large or complex distributions"""
 
+from __future__ import annotations
+
 import functools
 import os
 import re
@@ -194,7 +196,7 @@ class Command(_Command):
             )
         return val
 
-    def ensure_string_list(self, option):
+    def ensure_string_list(self, option: str):  # type: ignore[override] # Fixed in typeshed for next mypy release
         r"""Ensure that 'option' is a list of strings.  If 'option' is
         currently a string, we split it either on /,\s*/ or /\s+/, so
         "foo bar baz", "foo,bar,baz", and "foo,   bar baz" all become
@@ -221,7 +223,9 @@ class Command(_Command):
                     "'%s' must be a list of strings (got %r)" % (option, val)
                 )
 
-    def reinitialize_command(self, command, reinit_subcommands=False, **kw):
+    def reinitialize_command(  # type:ignore[override] # Extra **kw param
+        self, command: _Command | str, reinit_subcommands: bool = False, **kw
+    ):
         cmd = _Command.reinitialize_command(self, command, reinit_subcommands)
         vars(cmd).update(kw)
         return cmd
