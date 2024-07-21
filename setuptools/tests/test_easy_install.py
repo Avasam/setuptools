@@ -24,6 +24,7 @@ import pytest
 from jaraco import path
 
 from setuptools import sandbox
+from setuptools._reqs import is_sequence_not_str
 from setuptools.sandbox import run_setup
 import setuptools.command.easy_install as ei
 from setuptools.command.easy_install import PthDistributions
@@ -1229,7 +1230,7 @@ def create_setup_requires_package(
                 section = metadata
             else:
                 section = options
-            if isinstance(value, (tuple, list)):
+            if is_sequence_not_str(value):
                 value = ';'.join(value)
             section.append('%s: %s' % (name, value))
         test_setup_cfg_contents = DALS(

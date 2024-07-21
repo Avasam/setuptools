@@ -17,6 +17,7 @@ from contextlib import contextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Mapping
 
+from .._reqs import is_sequence_not_str
 from .._path import StrPath
 from ..errors import FileError, InvalidConfigError
 from ..warnings import SetuptoolsWarning
@@ -216,7 +217,7 @@ class _ConfigExpander:
 
     def _expand_packages(self):
         packages = self.setuptools_cfg.get("packages")
-        if packages is None or isinstance(packages, (list, tuple)):
+        if packages is None or is_sequence_not_str(packages):
             return
 
         find = packages.get("find")

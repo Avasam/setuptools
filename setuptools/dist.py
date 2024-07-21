@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 import io
 import itertools
 import numbers
@@ -34,10 +35,9 @@ from .config import setupcfg, pyprojecttoml
 from .discovery import ConfigDiscovery
 from .monkey import get_unpatched
 from .warnings import InformationOnly, SetuptoolsDeprecationWarning
+from ._reqs import _StrOrIter, is_sequence_not_str
 
 __all__ = ['Distribution']
-
-sequence = tuple, list
 
 
 def check_importable(dist, attr, value):
@@ -50,17 +50,17 @@ def check_importable(dist, attr, value):
         ) from e
 
 
-def assert_string_list(dist, attr, value):
-    """Verify that value is a string list"""
+def assert_string_list(dist, attr, value: Sequence[str]):
+    """Verify that value is a string Sequence"""
     try:
-        # verify that value is a list or tuple to exclude unordered
+        # verify that value is a Sequence to exclude unordered
         # or single-use iterables
-        assert isinstance(value, (list, tuple))
-        # verify that elements of value are strings
+        assert isinstance(value, Sequence)
+        # verify that elements of value are strings, and value isn't a string itself
         assert ''.join(value) != value
     except (TypeError, ValueError, AttributeError, AssertionError) as e:
         raise DistutilsSetupError(
-            "%r must be a list of strings (got %r)" % (attr, value)
+            "%r must be a Sequence of strings (got %r)" % (attr, value)
         ) from e
 
 
@@ -93,19 +93,20 @@ def check_nsp(dist, attr, value):
         )
 
 
-def check_extras(dist, attr, value):
+def check_extras(dist, attr, value: dict[str, _StrOrIter]):
     """Verify that extras_require mapping is valid"""
     try:
-        list(itertools.starmap(_check_extra, value.items()))
+        for extra, reqs in value.items():
+            _check_extra(extra, reqs)
     except (TypeError, ValueError, AttributeError) as e:
         raise DistutilsSetupError(
             "'extras_require' must be a dictionary whose values are "
-            "strings or lists of strings containing valid project/version "
+            "strings or Iterables of strings containing valid project/version "
             "requirement specifiers."
         ) from e
 
 
-def _check_extra(extra, reqs):
+def _check_extra(extra: str, reqs: _StrOrIter):
     name, sep, marker = extra.partition(':')
     try:
         _check_marker(marker)
@@ -137,15 +138,15 @@ def invalid_unless_false(dist, attr, value):
     raise DistutilsSetupError(f"{attr} is invalid.")
 
 
-def check_requirements(dist, attr, value):
-    """Verify that install_requires is a valid requirements list"""
+def check_requirements(dist, attr, value: str | Sequence[str]):
+    """Verify that install_requires is a valid requirements Sequence"""
     try:
         list(_reqs.parse(value))
-        if isinstance(value, (dict, set)):
+        if not isinstance(value, (str, Sequence)):
             raise TypeError("Unordered types are not allowed")
     except (TypeError, ValueError) as error:
         tmpl = (
-            "{attr!r} must be a string or list of strings "
+            "{attr!r} must be a string or Sequence of strings "
             "containing valid project/version requirement specifiers; {error}"
         )
         raise DistutilsSetupError(tmpl.format(attr=attr, error=error)) from error
@@ -173,11 +174,11 @@ def check_test_suite(dist, attr, value):
         raise DistutilsSetupError("test_suite must be a string")
 
 
-def check_package_data(dist, attr, value):
-    """Verify that value is a dictionary of package names to glob lists"""
+def check_package_data(dist, attr, value: dict[str, Sequence[str]]):
+    """Verify that value is a dictionary of package names to glob Sequences"""
     if not isinstance(value, dict):
         raise DistutilsSetupError(
-            "{!r} must be a dictionary mapping package names to lists of "
+            "{!r} must be a dictionary mapping package names to Sequences of "
             "string wildcard patterns".format(attr)
         )
     for k, v in value.items():
@@ -727,7 +728,7 @@ class Distribution(_Distribution):
         there.
 
         Currently, this method only supports inclusion for attributes that are
-        lists or tuples.  If you need to add support for adding to other
+        Sequences.  If you need to add support for adding to other
         attributes in this or a subclass, you can add an '_include_X' method,
         where 'X' is the name of the attribute.  The method will be called with
         the value passed to 'include()'.  So, 'dist.include(foo={"bar":"baz"})'
@@ -773,39 +774,42 @@ class Distribution(_Distribution):
 
         return False
 
-    def _exclude_misc(self, name, value):
-        """Handle 'exclude()' for list/tuple attrs without a special handler"""
-        if not isinstance(value, sequence):
+    def _exclude_misc(self, name, value: Sequence):
+        """Handle 'exclude()' for Sequence attrs without a special handler"""
+        if not is_sequence_not_str(value):
             raise DistutilsSetupError(
-                "%s: setting must be a list or tuple (%r)" % (name, value)
+                "%s: setting must be a Sequence (%r)" % (name, value)
             )
         try:
             old = getattr(self, name)
         except AttributeError as e:
             raise DistutilsSetupError("%s: No such distribution setting" % name) from e
-        if old is not None and not isinstance(old, sequence):
+        if old is not None and not is_sequence_not_str(value):
             raise DistutilsSetupError(
                 name + ": this setting cannot be changed via include/exclude"
             )
         elif old:
             setattr(self, name, [item for item in old if item not in value])
 
-    def _include_misc(self, name, value):
-        """Handle 'include()' for list/tuple attrs without a special handler"""
+    def _include_misc(self, name, value: Sequence):
+        """Handle 'include()' for Sequence attrs without a special handler"""
 
-        if not isinstance(value, sequence):
-            raise DistutilsSetupError("%s: setting must be a list (%r)" % (name, value))
+        if not is_sequence_not_str(value):
+            raise DistutilsSetupError(
+                "%s: setting must be a Sequence (%r)" % (name, value)
+            )
         try:
             old = getattr(self, name)
         except AttributeError as e:
             raise DistutilsSetupError("%s: No such distribution setting" % name) from e
         if old is None:
             setattr(self, name, value)
-        elif not isinstance(old, sequence):
+        elif not is_sequence_not_str(old):
             raise DistutilsSetupError(
                 name + ": this setting cannot be changed via include/exclude"
             )
         else:
+            old = list(old)
             new = [item for item in value if item not in old]
             setattr(self, name, old + new)
 
@@ -818,7 +822,7 @@ class Distribution(_Distribution):
         packages, modules, and extensions are also excluded.
 
         Currently, this method only supports exclusion from attributes that are
-        lists or tuples.  If you need to add support for excluding from other
+        Sequences.  If you need to add support for excluding from other
         attributes in this or a subclass, you can add an '_exclude_X' method,
         where 'X' is the name of the attribute.  The method will be called with
         the value passed to 'exclude()'.  So, 'dist.exclude(foo={"bar":"baz"})'
@@ -832,12 +836,13 @@ class Distribution(_Distribution):
             else:
                 self._exclude_misc(k, v)
 
-    def _exclude_packages(self, packages):
-        if not isinstance(packages, sequence):
+    def _exclude_packages(self, packages: Sequence):
+        if not is_sequence_not_str(packages):
             raise DistutilsSetupError(
-                "packages: setting must be a list or tuple (%r)" % (packages,)
+                "packages: setting must be a Sequence (%r)" % (packages,)
             )
-        list(map(self.exclude_package, packages))
+        for package in packages:
+            self.exclude_package(package)
 
     def _parse_command_opts(self, parser, args):
         # Remove --with-X/--without-X options when processing command args

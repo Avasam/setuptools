@@ -8,6 +8,8 @@ except ImportError:
     # fallback for SETUPTOOLS_USE_DISTUTILS=stdlib
     from .._distutils._modified import newer_pairwise_group
 
+from .._reqs import is_sequence_not_str
+
 
 class build_clib(orig.build_clib):
     """
@@ -28,51 +30,49 @@ class build_clib(orig.build_clib):
     def build_libraries(self, libraries):
         for lib_name, build_info in libraries:
             sources = build_info.get('sources')
-            if sources is None or not isinstance(sources, (list, tuple)):
+            if sources is None or not is_sequence_not_str(sources):
                 raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), "
                     "'sources' must be present and must be "
-                    "a list of source filenames" % lib_name
+                    "a Sequence of source filenames" % lib_name
                 )
-            sources = sorted(list(sources))
+            sources = sorted(sources)
 
             log.info("building '%s' library", lib_name)
 
             # Make sure everything is the correct type.
             # obj_deps should be a dictionary of keys as sources
-            # and a list/tuple of files that are its dependencies.
+            # and a Sequence of files that are its dependencies.
             obj_deps = build_info.get('obj_deps', dict())
             if not isinstance(obj_deps, dict):
                 raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), "
                     "'obj_deps' must be a dictionary of "
-                    "type 'source: list'" % lib_name
+                    "type 'source: Sequence'" % lib_name
                 )
             dependencies = []
 
             # Get the global dependencies that are specified by the '' key.
             # These will go into every source's dependency list.
-            global_deps = obj_deps.get('', list())
-            if not isinstance(global_deps, (list, tuple)):
+            global_deps = obj_deps.get('', ())
+            if not is_sequence_not_str(global_deps):
                 raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), "
                     "'obj_deps' must be a dictionary of "
-                    "type 'source: list'" % lib_name
+                    "type 'source: Sequence'" % lib_name
                 )
 
             # Build the list to be used by newer_pairwise_group
             # each source will be auto-added to its dependencies.
             for source in sources:
-                src_deps = [source]
-                src_deps.extend(global_deps)
-                extra_deps = obj_deps.get(source, list())
-                if not isinstance(extra_deps, (list, tuple)):
+                extra_deps = obj_deps.get(source, ())
+                if not is_sequence_not_str(extra_deps):
                     raise DistutilsSetupError(
                         "in 'libraries' option (library '%s'), "
                         "'obj_deps' must be a dictionary of "
-                        "type 'source: list'" % lib_name
+                        "type 'source: Sequence'" % lib_name
                     )
-                src_deps.extend(extra_deps)
+                src_deps = [source, *global_deps, extra_deps]
                 dependencies.append(src_deps)
 
             expected_objects = self.compiler.object_filenames(

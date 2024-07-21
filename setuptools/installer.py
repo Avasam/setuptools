@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import glob
 import os
 import subprocess
@@ -12,12 +13,12 @@ from .wheel import Wheel
 from .warnings import SetuptoolsDeprecationWarning
 
 
-def _fixup_find_links(find_links):
-    """Ensure find-links option end-up being a list of strings."""
+def _fixup_find_links(find_links: Sequence[str]):
+    """Ensure find-links option end-up being a Sequence of strings."""
     if isinstance(find_links, str):
         return find_links.split()
-    assert isinstance(find_links, (tuple, list))
-    return find_links
+    assert isinstance(find_links, Sequence)
+    return list(find_links)
 
 
 def fetch_build_egg(dist, req):

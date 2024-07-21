@@ -1,8 +1,20 @@
+from collections.abc import Sequence
 from functools import lru_cache
-from typing import Callable, Iterable, Iterator, TypeVar, Union, overload
-
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    Iterator,
+    TypeVar,
+    Union,
+    overload,
+)
 import jaraco.text as text
 from packaging.requirements import Requirement
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeIs
 
 _T = TypeVar("_T")
 _StrOrIter = Union[str, Iterable[str]]
@@ -25,14 +37,14 @@ def parse_strings(strs: _StrOrIter) -> Iterator[str]:
 
 @overload
 def parse(strs: _StrOrIter) -> Iterator[Requirement]: ...
-
-
 @overload
 def parse(strs: _StrOrIter, parser: Callable[[str], _T]) -> Iterator[_T]: ...
-
-
 def parse(strs, parser=parse_req):
     """
     Replacement for ``pkg_resources.parse_requirements`` that uses ``packaging``.
     """
     return map(parser, parse_strings(strs))
+
+
+def is_sequence_not_str(value: object) -> TypeIs[Sequence[Any]]:
+    return not isinstance(value, str) and isinstance(value, Sequence)
