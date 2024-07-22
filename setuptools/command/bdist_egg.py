@@ -2,6 +2,8 @@
 
 Build .egg distributions"""
 
+from __future__ import annotations
+
 from distutils.dir_util import remove_tree, mkpath
 from distutils import log
 from types import CodeType
