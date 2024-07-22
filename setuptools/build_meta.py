@@ -28,6 +28,7 @@ Again, this is not a formal definition! Just a "taste" of the module.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import io
 import os
 import shlex
@@ -40,7 +41,6 @@ import warnings
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Dict,
     Iterator,
     List,
     Union,
@@ -152,7 +152,7 @@ def suppress_known_deprecation():
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    _ConfigSettings: TypeAlias = Union[Dict[str, Union[str, List[str], None]], None]
+    _ConfigSettings: TypeAlias = Union[Mapping[str, Union[str, List[str], None]], None]
     """
     Currently the user can run::
 
@@ -167,7 +167,7 @@ if TYPE_CHECKING:
     - PEP 517 specifies that ``config_settings`` is an optional dict.
     """
 else:
-    _ConfigSettings = Union[Dict[str, Union[str, List[str], None]], None]
+    _ConfigSettings = Union[Mapping[str, Union[str, List[str], None]], None]
 
 
 class _ConfigSettingsTranslator:

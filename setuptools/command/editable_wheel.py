@@ -395,7 +395,9 @@ class editable_wheel(Command):
 
 
 class EditableStrategy(Protocol):
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]): ...
+    def __call__(
+        self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]
+    ): ...
     def __enter__(self): ...
     def __exit__(
         self,
@@ -411,7 +413,7 @@ class _StaticPth:
         self.name = name
         self.path_entries = path_entries
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         entries = "\n".join(str(p.resolve()) for p in self.path_entries)
         contents = _encode_pth(f"{entries}\n")
         wheel.writestr(f"__editable__.{self.name}.pth", contents)
@@ -455,7 +457,7 @@ class _LinkTree(_StaticPth):
         self._file = dist.get_command_obj("build_py").copy_file
         super().__init__(dist, name, [self.auxiliary_dir])
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         self._create_links(files, mapping)
         super().__call__(wheel, files, mapping)
 
@@ -472,7 +474,7 @@ class _LinkTree(_StaticPth):
             dest.parent.mkdir(parents=True)
         self._file(src_file, dest, link=link)
 
-    def _create_links(self, outputs, output_mapping):
+    def _create_links(self, outputs, output_mapping: Mapping[str, str]):
         self.auxiliary_dir.mkdir(parents=True, exist_ok=True)
         link_type = "sym" if _can_symlink_files(self.auxiliary_dir) else "hard"
         mappings = {self._normalize_output(k): v for k, v in output_mapping.items()}
@@ -548,7 +550,7 @@ class _TopLevelFinder:
         content = _encode_pth(f"import {finder}; {finder}.install()")
         yield (f"__editable__.{self.name}.pth", content)
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         for file, content in self.get_implementation():
             wheel.writestr(file, content)
 
