@@ -95,7 +95,7 @@ def read_configuration(
         If not given a dummy object will be created and discarded after the
         configuration is read. This is used for auto-discovery of packages and in the
         case a dynamic configuration (e.g. ``attr`` or ``cmdclass``) is expanded.
-        When ``expand:bool=False`` this object is simply ignored.
+        When ``expand=False`` this object is simply ignored.
 
     :rtype: dict
     """
@@ -118,9 +118,9 @@ def read_configuration(
     if "distutils" in tool_table:
         _ExperimentalConfiguration.emit(subject="[tool.distutils]")
 
-    # There is an overall sense in the community that making include_package_data:bool=True
+    # There is an overall sense in the community that making include_package_data=True
     # the default would be an improvement.
-    # `ini2toml` backfills include_package_data:bool=False when nothing is explicitly given,
+    # `ini2toml` backfills include_package_data=False when nothing is explicitly given,
     # therefore setting a default here is backwards compatible.
     if dist and getattr(dist, "include_package_data", None) is not None:
         setuptools_table.setdefault("include-package-data", dist.include_package_data)
