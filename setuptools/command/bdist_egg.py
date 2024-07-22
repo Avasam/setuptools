@@ -10,13 +10,16 @@ import os
 import re
 import textwrap
 import marshal
-from zipfile import _ZipFileMode
+from typing import TYPE_CHECKING
 
 from setuptools.extension import Library
 from setuptools import Command
 from .._path import ensure_directory
 
 from sysconfig import get_path, get_python_version
+
+if TYPE_CHECKING:
+    from zipfile import _ZipFileMode
 
 
 def _get_purelib():
