@@ -43,7 +43,6 @@ from typing import (
     Dict,
     Iterator,
     List,
-    TypeAlias,
     Union,
     Iterable,
 )

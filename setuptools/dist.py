@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 import io
 import itertools
 import numbers
@@ -8,7 +9,7 @@ import re
 import sys
 from glob import iglob
 from pathlib import Path
-from typing import TYPE_CHECKING, MutableMapping
+from typing import TYPE_CHECKING, Any, MutableMapping
 
 import distutils.cmd
 import distutils.command
@@ -26,8 +27,11 @@ from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import Version
 
+from setuptools._path import StrPath
+
 from . import _entry_points
 from . import _reqs
+from ._reqs import _StrOrIter
 from . import command as _  # noqa  -- imported for side-effects
 from ._importlib import metadata
 from .config import setupcfg, pyprojecttoml
@@ -55,7 +59,7 @@ def assert_string_list(dist, attr, value):
     try:
         # verify that value is a list or tuple to exclude unordered
         # or single-use iterables
-        assert isinstance(value, (list, tuple))
+        assert isinstance(value, sequence)
         # verify that elements of value are strings
         assert ''.join(value) != value
     except (TypeError, ValueError, AttributeError, AssertionError) as e:
@@ -270,16 +274,17 @@ class Distribution(_Distribution):
     # Used by build_py, editable_wheel and install_lib commands for legacy namespaces
     namespace_packages: list[str]  #: :meta private: DEPRECATED
 
-    def __init__(self, attrs: MutableMapping | None = None) -> None:
+    # Any: Dynamic assignment results in Incompatible types in assignment
+    def __init__(self, attrs: MutableMapping[str, Any] | None = None) -> None:
         have_package_data = hasattr(self, "package_data")
         if not have_package_data:
             self.package_data: dict[str, list[str]] = {}
         attrs = attrs or {}
         self.dist_files: list[tuple[str, str, str]] = []
         # Filter-out setuptools' specific options.
-        self.src_root = attrs.pop("src_root", None)
-        self.dependency_links = attrs.pop('dependency_links', [])
-        self.setup_requires = attrs.pop('setup_requires', [])
+        self.src_root: str | None = attrs.pop("src_root", None)
+        self.dependency_links: list[str] = attrs.pop('dependency_links', [])
+        self.setup_requires: list[str] = attrs.pop('setup_requires', [])
         for ep in metadata.entry_points(group='distutils.setup_keywords'):
             vars(self).setdefault(ep.name, None)
 
@@ -481,7 +486,7 @@ class Distribution(_Distribution):
             except ValueError as e:
                 raise DistutilsOptionError(e) from e
 
-    def warn_dash_deprecation(self, opt, section):
+    def warn_dash_deprecation(self, opt: str, section: str):
         if section in (
             'options.extras_require',
             'options.data_files',
@@ -523,7 +528,7 @@ class Distribution(_Distribution):
             # during bootstrapping, distribution doesn't exist
             return []
 
-    def make_option_lowercase(self, opt, section):
+    def make_option_lowercase(self, opt: str, section: str):
         if section != 'metadata' or opt.islower():
             return opt
 
@@ -587,7 +592,7 @@ class Distribution(_Distribution):
             except ValueError as e:
                 raise DistutilsOptionError(e) from e
 
-    def _get_project_config_files(self, filenames):
+    def _get_project_config_files(self, filenames: Iterable[StrPath] | None):
         """Add default file and split between INI and TOML"""
         tomlfiles = []
         standard_project_metadata = Path(self.src_root or os.curdir, "pyproject.toml")
@@ -599,7 +604,11 @@ class Distribution(_Distribution):
             tomlfiles = [standard_project_metadata]
         return filenames, tomlfiles
 
-    def parse_config_files(self, filenames=None, ignore_option_errors=False):
+    def parse_config_files(
+        self,
+        filenames: Iterable[StrPath] | None = None,
+        ignore_option_errors: bool = False,
+    ):
         """Parses configuration files from various levels
         and loads configuration.
         """
@@ -616,7 +625,7 @@ class Distribution(_Distribution):
         self._finalize_requires()
         self._finalize_license_files()
 
-    def fetch_build_eggs(self, requires):
+    def fetch_build_eggs(self, requires: _StrOrIter):
         """Resolve pre-setup requirements"""
         from .installer import _fetch_build_eggs
 
@@ -687,7 +696,7 @@ class Distribution(_Distribution):
 
         return fetch_build_egg(self, req)
 
-    def get_command_class(self, command):
+    def get_command_class(self, command: str):
         """Pluggable version of get_command_class()"""
         if command in self.cmdclass:
             return self.cmdclass[command]
@@ -741,7 +750,7 @@ class Distribution(_Distribution):
             else:
                 self._include_misc(k, v)
 
-    def exclude_package(self, package):
+    def exclude_package(self, package: str):
         """Remove packages, modules, and extensions in named package"""
 
         pfx = package + '.'
@@ -762,7 +771,7 @@ class Distribution(_Distribution):
                 if p.name != package and not p.name.startswith(pfx)
             ]
 
-    def has_contents_for(self, package):
+    def has_contents_for(self, package: str):
         """Return true if 'exclude_package(package)' would do something"""
 
         pfx = package + '.'

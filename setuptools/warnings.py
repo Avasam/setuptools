@@ -12,9 +12,14 @@ import warnings
 from datetime import date
 from inspect import cleandoc
 from textwrap import indent
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
 
-_DueDate = Tuple[int, int, int]  # time tuple
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    _DueDate: TypeAlias = Tuple[int, int, int]  # time tuple
+else:
+    _DueDate = Tuple[int, int, int]
 _INDENT = 8 * " "
 _TEMPLATE = f"""{80 * '*'}\n{{details}}\n{80 * '*'}"""
 

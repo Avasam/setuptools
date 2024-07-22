@@ -57,12 +57,15 @@ from ._path import StrPath
 from distutils import log
 from distutils.util import convert_path
 
-StrIter = Iterator[str]
-
-chain_iter = itertools.chain.from_iterable
-
 if TYPE_CHECKING:
     from setuptools import Distribution
+    from typing_extensions import TypeAlias
+
+    StrIter: TypeAlias = Iterator[str]
+else:
+    StrIter = Iterator[str]
+
+chain_iter = itertools.chain.from_iterable
 
 
 def _valid_name(path: StrPath) -> bool:

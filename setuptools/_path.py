@@ -1,9 +1,11 @@
 import os
 import sys
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
-if sys.version_info >= (3, 9):
-    StrPath = Union[str, os.PathLike[str]]  #  Same as _typeshed.StrPath
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    StrPath: TypeAlias = Union[str, os.PathLike[str]]  #  Same as _typeshed.StrPath
 else:
     StrPath = Union[str, os.PathLike]
 

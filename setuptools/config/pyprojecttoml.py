@@ -15,6 +15,7 @@ import logging
 import os
 from contextlib import contextmanager
 from functools import partial
+from types import TracebackType
 from typing import TYPE_CHECKING, Any, Callable, Mapping
 
 from .._path import StrPath
@@ -62,7 +63,7 @@ def validate(config: dict, filepath: StrPath) -> bool:
 def apply_configuration(
     dist: Distribution,
     filepath: StrPath,
-    ignore_option_errors=False,
+    ignore_option_errors: bool = False,
 ) -> Distribution:
     """Apply the configuration from a ``pyproject.toml`` file into an existing
     distribution object.
@@ -73,8 +74,8 @@ def apply_configuration(
 
 def read_configuration(
     filepath: StrPath,
-    expand=True,
-    ignore_option_errors=False,
+    expand: bool = True,
+    ignore_option_errors: bool = False,
     dist: Distribution | None = None,
 ) -> dict[str, Any]:
     """Read given configuration file and returns options from it as a dict.
@@ -94,7 +95,7 @@ def read_configuration(
         If not given a dummy object will be created and discarded after the
         configuration is read. This is used for auto-discovery of packages and in the
         case a dynamic configuration (e.g. ``attr`` or ``cmdclass``) is expanded.
-        When ``expand=False`` this object is simply ignored.
+        When ``expand:bool=False`` this object is simply ignored.
 
     :rtype: dict
     """
@@ -117,9 +118,9 @@ def read_configuration(
     if "distutils" in tool_table:
         _ExperimentalConfiguration.emit(subject="[tool.distutils]")
 
-    # There is an overall sense in the community that making include_package_data=True
+    # There is an overall sense in the community that making include_package_data:bool=True
     # the default would be an improvement.
-    # `ini2toml` backfills include_package_data=False when nothing is explicitly given,
+    # `ini2toml` backfills include_package_data:bool=False when nothing is explicitly given,
     # therefore setting a default here is backwards compatible.
     if dist and getattr(dist, "include_package_data", None) is not None:
         setuptools_table.setdefault("include-package-data", dist.include_package_data)
@@ -430,7 +431,12 @@ class _EnsurePackagesDiscovered(_expand.EnsurePackagesDiscovered):
 
         return super().__enter__()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
         """When exiting the context, if values of ``packages``, ``py_modules`` and
         ``package_dir`` are missing in ``setuptools_cfg``, copy from ``dist``.
         """

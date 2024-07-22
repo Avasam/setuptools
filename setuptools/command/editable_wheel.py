@@ -23,6 +23,7 @@ from inspect import cleandoc
 from itertools import chain, starmap
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Iterable,
@@ -398,7 +399,12 @@ class EditableStrategy(Protocol):
 
     def __enter__(self): ...
 
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ): ...
 
 
 class _StaticPth:
@@ -420,7 +426,12 @@ class _StaticPth:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ): ...
 
 
 class _LinkTree(_StaticPth):
@@ -482,7 +493,12 @@ class _LinkTree(_StaticPth):
         _logger.warning(msg + _STRICT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ):
         msg = f"""\n
         Strict editable installation performed using the auxiliary directory:
             {self.auxiliary_dir}
@@ -543,7 +559,12 @@ class _TopLevelFinder:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ):
         msg = """\n
         Please be careful with folders in your working directory with the same
         name as your package as they may take precedence during imports.

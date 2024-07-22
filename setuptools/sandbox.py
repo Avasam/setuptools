@@ -11,6 +11,7 @@ import contextlib
 import pickle
 import textwrap
 import builtins
+from types import TracebackType
 
 import pkg_resources
 from distutils.errors import DistutilsError
@@ -124,7 +125,12 @@ class ExceptionSaver:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, exc, tb):
+    def __exit__(
+        self,
+        type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ):
         if not exc:
             return False
 
@@ -288,7 +294,12 @@ class AbstractSandbox:
         builtins.open = self._open
         self._active = True
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
         self._active = False
         if _file:
             builtins.file = _file
@@ -410,7 +421,8 @@ else:
 class DirectorySandbox(AbstractSandbox):
     """Restrict operations to a single subdirectory - pseudo-chroot"""
 
-    write_ops = dict.fromkeys([
+    # TODO: Make this a set
+    write_ops: dict[str, None] = dict.fromkeys([
         "open",
         "chmod",
         "chown",
@@ -492,7 +504,7 @@ class DirectorySandbox(AbstractSandbox):
             self._violation(operation, src, dst, *args, **kw)
         return (src, dst)
 
-    def open(self, file, flags, mode=0o777, *args, **kw):
+    def open(self, file, flags, mode: int = 0o777, *args, **kw):
         """Called for low-level os.open()"""
         if flags & WRITE_FLAGS and not self._ok(file):
             self._violation("os.open", file, flags, mode, *args, **kw)

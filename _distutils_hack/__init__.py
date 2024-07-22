@@ -1,6 +1,8 @@
 # don't import any costly modules
+from __future__ import annotations
 import sys
 import os
+from types import TracebackType
 
 
 report_url = (
@@ -221,7 +223,12 @@ class shim:
     def __enter__(self):
         insert_shim()
 
-    def __exit__(self, exc, value, tb):
+    def __exit__(
+        self,
+        exc: type[BaseException] | None,
+        value: BaseException | None,
+        tb: TracebackType | None,
+    ):
         _remove_shim()
 
 
