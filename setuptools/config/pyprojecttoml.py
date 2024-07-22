@@ -95,7 +95,7 @@ def read_configuration(
         If not given a dummy object will be created and discarded after the
         configuration is read. This is used for auto-discovery of packages and in the
         case a dynamic configuration (e.g. ``attr`` or ``cmdclass``) is expanded.
-        When ``expand:bool=False`` this object is simply ignored.
+        When ``expand=False`` this object is simply ignored.
 
     :rtype: dict
     """
