@@ -28,7 +28,6 @@ Again, this is not a formal definition! Just a "taste" of the module.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 import io
 import os
 import shlex
@@ -45,6 +44,7 @@ from typing import (
     List,
     Union,
     Iterable,
+    Mapping,
 )
 
 import setuptools
