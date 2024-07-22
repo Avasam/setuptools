@@ -421,7 +421,6 @@ else:
 class DirectorySandbox(AbstractSandbox):
     """Restrict operations to a single subdirectory - pseudo-chroot"""
 
-    # TODO: Make this a set
     write_ops: dict[str, None] = dict.fromkeys([
         "open",
         "chmod",

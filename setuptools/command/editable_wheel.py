@@ -396,9 +396,7 @@ class editable_wheel(Command):
 
 class EditableStrategy(Protocol):
     def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]): ...
-
     def __enter__(self): ...
-
     def __exit__(
         self,
         _exc_type: type[BaseException] | None,

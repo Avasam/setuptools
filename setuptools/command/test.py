@@ -1,3 +1,5 @@
+from __future__ import annotations
+from collections.abc import Callable
 import os
 import operator
 import sys
@@ -64,10 +66,10 @@ class ScanningLoader(TestLoader):
 
 # adapted from jaraco.classes.properties:NonDataProperty
 class NonDataProperty:
-    def __init__(self, fget):
+    def __init__(self, fget: Callable):
         self.fget = fget
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj, objtype: object = None):
         if obj is None:
             return self
         return self.fget(obj)

@@ -10,6 +10,7 @@ import os
 import re
 import textwrap
 import marshal
+from zipfile import _ZipFileMode
 
 from setuptools.extension import Library
 from setuptools import Command
@@ -430,7 +431,12 @@ INSTALL_DIRECTORY_ATTRS = ['install_lib', 'install_dir', 'install_data', 'instal
 
 
 def make_zipfile(
-    zip_filename, base_dir, verbose=False, dry_run=False, compress=True, mode='w'
+    zip_filename,
+    base_dir,
+    verbose: bool = False,
+    dry_run: bool = False,
+    compress=True,
+    mode: _ZipFileMode = 'w',
 ):
     """Create a zip file from all the files under 'base_dir'.  The output
     zip file will be named 'base_dir' + ".zip".  Uses either the "zipfile"
