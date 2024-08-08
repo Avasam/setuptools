@@ -7,6 +7,7 @@ from itertools import chain
 from typing import ClassVar
 
 from .._importlib import metadata
+from ..dist import Distribution
 from .build import _ORIGINAL_SUBCOMMANDS
 
 _default_revctrl = list
@@ -45,6 +46,7 @@ class sdist(orig.sdist):
         ),
     ]
 
+    distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
     negative_opt: ClassVar[dict[str, str]] = {}  # type: ignore[misc] # Fixed upstream in typeshed to be a ClassVar
 
     README_EXTENSIONS = ['', '.rst', '.txt', '.md']

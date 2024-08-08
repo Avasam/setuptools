@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import os
 import sys
@@ -7,9 +9,10 @@ from more_itertools import unique_everseen
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+if sys.version_info >= (3, 9):
     StrPath: TypeAlias = Union[str, os.PathLike[str]]  #  Same as _typeshed.StrPath
 else:
-    StrPath = Union[str, os.PathLike]
+    StrPath: TypeAlias = Union[str, os.PathLike]
 
 
 def ensure_directory(path):

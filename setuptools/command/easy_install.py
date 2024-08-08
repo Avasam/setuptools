@@ -2059,7 +2059,7 @@ class CommandSpec(list):
         return os.environ.get('__PYVENV_LAUNCHER__', _default)
 
     @classmethod
-    def from_param(cls, param: Self | str | Iterable[str] | None):
+    def from_param(cls, param: Self | str | Iterable[str] | None) -> Self:
         """
         Construct a CommandSpec from a parameter to build_scripts, which may
         be None.
@@ -2070,7 +2070,10 @@ class CommandSpec(list):
             return cls.from_string(param)
         if isinstance(param, Iterable):
             return cls(param)
-        return cls.from_environment()
+        if param is None:
+            return cls.from_environment()
+        # AttributeError to keep backwards compatibility, this should really be a TypeError though
+        raise AttributeError(f"Argument has an unsupported type {type(param)}")
 
     @classmethod
     def from_environment(cls):

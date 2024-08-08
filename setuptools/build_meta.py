@@ -55,7 +55,6 @@ from ._reqs import parse_strings
 from .warnings import SetuptoolsDeprecationWarning
 from distutils.util import strtobool
 
-
 __all__ = [
     'get_requires_for_build_sdist',
     'get_requires_for_build_wheel',

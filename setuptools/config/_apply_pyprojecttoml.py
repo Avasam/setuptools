@@ -30,14 +30,15 @@ from ..errors import RemovedConfigError
 from ..warnings import SetuptoolsWarning
 
 if TYPE_CHECKING:
-    from distutils.dist import _OptionsList
+    from distutils.dist import _OptionsList  # Comes from typeshed
     from setuptools._importlib import metadata
     from setuptools.dist import Distribution
+    from typing_extensions import TypeAlias
 
 EMPTY: Mapping = MappingProxyType({})  # Immutable dict-like
-_ProjectReadmeValue = Union[str, Dict[str, str]]
-_CorrespFn = Callable[["Distribution", Any, Union[StrPath, None]], None]
-_Correspondence = Union[str, _CorrespFn]
+_ProjectReadmeValue: TypeAlias = Union[str, Dict[str, str]]
+_CorrespFn: TypeAlias = Callable[["Distribution", Any, Union[StrPath, None]], None]
+_Correspondence: TypeAlias = Union[str, _CorrespFn]
 
 _logger = logging.getLogger(__name__)
 

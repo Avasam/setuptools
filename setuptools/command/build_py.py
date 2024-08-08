@@ -16,6 +16,7 @@ from typing import Iterable, Iterator
 from more_itertools import unique_everseen
 
 from setuptools._path import StrPath
+from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning
 
 _IMPLICIT_DATA_FILES = ('*.pyi', 'py.typed')
@@ -35,6 +36,7 @@ class build_py(orig.build_py):
     'py_modules' and 'packages' in the same setup operation.
     """
 
+    distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
     editable_mode: bool = False
     existing_egg_info_dir: str | None = None  #: Private API, internal use only.
 
