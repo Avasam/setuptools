@@ -37,8 +37,7 @@ if TYPE_CHECKING:
 
 EMPTY: Mapping = MappingProxyType({})  # Immutable dict-like
 _ProjectReadmeValue: TypeAlias = Union[str, Dict[str, str]]
-_CorrespFn: TypeAlias = Callable[["Distribution", Any, Union[StrPath, None]], None]
-_Correspondence: TypeAlias = Union[str, _CorrespFn]
+_Correspondence: TypeAlias = Callable[["Distribution", Any, Union[StrPath, None]], None]
 
 _logger = logging.getLogger(__name__)
 
