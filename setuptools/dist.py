@@ -198,10 +198,8 @@ def check_packages(dist, attr, value):
 
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     # Work around a mypy issue where type[T] can't be used as a base: https://github.com/python/mypy/issues/10962
-    _Distribution: TypeAlias = distutils.core.Distribution
+    from distutils.core import Distribution as _Distribution
 else:
     _Distribution = get_unpatched(distutils.core.Distribution)
 

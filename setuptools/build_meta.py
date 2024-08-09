@@ -55,6 +55,9 @@ from ._reqs import parse_strings
 from .warnings import SetuptoolsDeprecationWarning
 from distutils.util import strtobool
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
 __all__ = [
     'get_requires_for_build_sdist',
     'get_requires_for_build_wheel',
@@ -148,25 +151,20 @@ def suppress_known_deprecation():
         yield
 
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+_ConfigSettings: TypeAlias = Union[Mapping[str, Union[str, List[str], None]], None]
+"""
+Currently the user can run::
 
-    _ConfigSettings: TypeAlias = Union[Mapping[str, Union[str, List[str], None]], None]
-    """
-    Currently the user can run::
+    pip install -e . --config-settings key=value
+    python -m build -C--key=value -C key=value
 
-        pip install -e . --config-settings key=value
-        python -m build -C--key=value -C key=value
-
-    - pip will pass both key and value as strings and overwriting repeated keys
-    (pypa/pip#11059).
-    - build will accumulate values associated with repeated keys in a list.
-    It will also accept keys with no associated value.
-    This means that an option passed by build can be ``str | list[str] | None``.
-    - PEP 517 specifies that ``config_settings`` is an optional dict.
-    """
-else:
-    _ConfigSettings = Union[Mapping[str, Union[str, List[str], None]], None]
+- pip will pass both key and value as strings and overwriting repeated keys
+(pypa/pip#11059).
+- build will accumulate values associated with repeated keys in a list.
+It will also accept keys with no associated value.
+This means that an option passed by build can be ``str | list[str] | None``.
+- PEP 517 specifies that ``config_settings`` is an optional dict.
+"""
 
 
 class _ConfigSettingsTranslator:

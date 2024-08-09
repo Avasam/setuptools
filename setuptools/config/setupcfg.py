@@ -45,18 +45,14 @@ if TYPE_CHECKING:
     from setuptools.dist import Distribution
     from typing_extensions import TypeAlias
 
-    SingleCommandOptions: TypeAlias = Dict[str, Tuple[str, Any]]
-    """Dict that associate the name of the options of a particular command to a
-    tuple. The first element of the tuple indicates the origin of the option value
-    (e.g. the name of the configuration file where it was read from),
-    while the second element of the tuple is the option value itself
-    """
-    AllCommandOptions: TypeAlias = Dict[str, SingleCommandOptions]
-    """cmd name => its options"""
-
-else:
-    SingleCommandOptions = Dict[str, Tuple[str, Any]]
-    AllCommandOptions = Dict[str, SingleCommandOptions]
+SingleCommandOptions: TypeAlias = Dict[str, Tuple[str, Any]]
+"""Dict that associate the name of the options of a particular command to a
+tuple. The first element of the tuple indicates the origin of the option value
+(e.g. the name of the configuration file where it was read from),
+while the second element of the tuple is the option value itself
+"""
+AllCommandOptions: TypeAlias = Dict[str, SingleCommandOptions]
+"""cmd name => its options"""
 Target = TypeVar("Target", bound=Union["Distribution", "DistributionMetadata"])
 
 

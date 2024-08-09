@@ -114,10 +114,8 @@ def setup(**attrs):
 setup.__doc__ = distutils.core.setup.__doc__
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     # Work around a mypy issue where type[T] can't be used as a base: https://github.com/python/mypy/issues/10962
-    _Command: TypeAlias = distutils.core.Command
+    from distutils.core import Command as _Command
 else:
     _Command = monkey.get_unpatched(distutils.core.Command)
 

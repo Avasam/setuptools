@@ -61,10 +61,7 @@ if TYPE_CHECKING:
     from setuptools import Distribution
     from typing_extensions import TypeAlias
 
-    StrIter: TypeAlias = Iterator[str]
-else:
-    StrIter = Iterator[str]
-
+StrIter: TypeAlias = Iterator[str]
 chain_iter = itertools.chain.from_iterable
 
 

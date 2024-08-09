@@ -17,9 +17,7 @@ from typing import TYPE_CHECKING, Tuple
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    _DueDate: TypeAlias = Tuple[int, int, int]  # time tuple
-else:
-    _DueDate = Tuple[int, int, int]
+_DueDate: TypeAlias = Tuple[int, int, int]  # time tuple
 _INDENT = 8 * " "
 _TEMPLATE = f"""{80 * '*'}\n{{details}}\n{80 * '*'}"""
 

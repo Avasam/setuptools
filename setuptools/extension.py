@@ -28,10 +28,8 @@ def _have_cython():
 # for compatibility
 have_pyrex = _have_cython
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     # Work around a mypy issue where type[T] can't be used as a base: https://github.com/python/mypy/issues/10962
-    _Extension: TypeAlias = distutils.core.Extension
+    from distutils.core import Extension as _Extension
 else:
     _Extension = get_unpatched(distutils.core.Extension)
 
