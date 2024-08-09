@@ -295,7 +295,9 @@ class _ConfigSettingsTranslator:
 
 
 class _BuildMetaBackend(_ConfigSettingsTranslator):
-    def _get_build_requires(self, config_settings: _ConfigSettings, requirements):
+    def _get_build_requires(
+        self, config_settings: _ConfigSettings, requirements: list[str]
+    ):
         sys.argv = [
             *sys.argv[:1],
             *self._global_args(config_settings),

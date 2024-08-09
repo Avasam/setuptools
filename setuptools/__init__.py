@@ -83,7 +83,7 @@ def _install_setup_requires(attrs):
         _fetch_build_eggs(dist)
 
 
-def _fetch_build_eggs(dist):
+def _fetch_build_eggs(dist: Distribution):
     try:
         dist.fetch_build_eggs(dist.setup_requires)
     except Exception as ex:

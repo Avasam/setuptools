@@ -51,7 +51,7 @@ if TYPE_CHECKING:
     from setuptools.dist import Distribution
 
 _K = TypeVar("_K")
-_VCo = TypeVar("_VCo", covariant=True)
+_V_co = TypeVar("_V_co", covariant=True)
 
 
 class StaticModule:
@@ -415,7 +415,7 @@ class EnsurePackagesDiscovered:
         return LazyMappingProxy(self._get_package_dir)
 
 
-class LazyMappingProxy(Mapping[_K, _VCo]):
+class LazyMappingProxy(Mapping[_K, _V_co]):
     """Mapping proxy that delays resolving the target object, until really needed.
 
     >>> def obtain_mapping():
@@ -429,16 +429,16 @@ class LazyMappingProxy(Mapping[_K, _VCo]):
     'other value'
     """
 
-    def __init__(self, obtain_mapping_value: Callable[[], Mapping[_K, _VCo]]):
+    def __init__(self, obtain_mapping_value: Callable[[], Mapping[_K, _V_co]]):
         self._obtain = obtain_mapping_value
-        self._value: Mapping[_K, _VCo] | None = None
+        self._value: Mapping[_K, _V_co] | None = None
 
-    def _target(self) -> Mapping[_K, _VCo]:
+    def _target(self) -> Mapping[_K, _V_co]:
         if self._value is None:
             self._value = self._obtain()
         return self._value
 
-    def __getitem__(self, key: _K) -> _VCo:
+    def __getitem__(self, key: _K) -> _V_co:
         return self._target()[key]
 
     def __len__(self) -> int:
