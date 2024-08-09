@@ -159,10 +159,10 @@ Currently the user can run::
     python -m build -C--key=value -C key=value
 
 - pip will pass both key and value as strings and overwriting repeated keys
-(pypa/pip#11059).
+  (pypa/pip#11059).
 - build will accumulate values associated with repeated keys in a list.
-It will also accept keys with no associated value.
-This means that an option passed by build can be ``str | list[str] | None``.
+  It will also accept keys with no associated value.
+  This means that an option passed by build can be ``str | list[str] | None``.
 - PEP 517 specifies that ``config_settings`` is an optional dict.
 """
 
