@@ -12,7 +12,7 @@ import os
 import re
 import textwrap
 import marshal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from setuptools.extension import Library
 from setuptools import Command
@@ -21,7 +21,10 @@ from .._path import ensure_directory
 from sysconfig import get_path, get_python_version
 
 if TYPE_CHECKING:
-    from zipfile import _ZipFileMode
+    from typing_extensions import TypeAlias
+
+# Same as zipfile._ZipFileMode from typeshed
+_ZipFileMode: TypeAlias = Literal["r", "w", "x", "a"]
 
 
 def _get_purelib():
