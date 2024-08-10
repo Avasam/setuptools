@@ -47,7 +47,7 @@ class sdist(orig.sdist):
     ]
 
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
-    negative_opt: ClassVar[dict[str, str]] = {}  # type: ignore[misc] # Fixed upstream in typeshed to be a ClassVar
+    negative_opt: ClassVar[dict[str, str]] = {}  # type: ignore[misc] # Fixed upstream in typeshed to be a ClassVar. Should be included in mypy 1.12
 
     README_EXTENSIONS = ['', '.rst', '.txt', '.md']
     READMES = tuple('README{0}'.format(ext) for ext in README_EXTENSIONS)
