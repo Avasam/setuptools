@@ -22,10 +22,6 @@ if sys.platform.startswith('java'):
     import org.python.modules.posix.PosixModule as _os
 else:
     _os = sys.modules[os.name]
-try:
-    _file = file  # type: ignore[name-defined] # Check for global variable
-except NameError:
-    _file = None
 _open = open
 
 
@@ -290,8 +286,6 @@ class AbstractSandbox(ABC):
 
     def __enter__(self):
         self._copy(self)
-        if _file:
-            builtins.file = self._file
         builtins.open = self._open
         self._active = True
 
@@ -302,8 +296,6 @@ class AbstractSandbox(ABC):
         traceback: TracebackType | None,
     ):
         self._active = False
-        if _file:
-            builtins.file = _file
         builtins.open = _open
         self._copy(_os)
 
@@ -336,8 +328,6 @@ class AbstractSandbox(ABC):
 
         return wrap
 
-    if _file:
-        _file = _mk_single_path_wrapper('file', _file)
     _open = _mk_single_path_wrapper('open', _open)
     for __name in [
         "stat",
@@ -453,13 +443,6 @@ class DirectorySandbox(AbstractSandbox):
         from setuptools.sandbox import SandboxViolation
 
         raise SandboxViolation(operation, args, kw)
-
-    if _file:
-
-        def _file(self, path, mode='r', *args, **kw):
-            if mode not in ('r', 'rt', 'rb', 'rU', 'U') and not self._ok(path):
-                self._violation("file", path, mode, *args, **kw)
-            return _file(path, mode, *args, **kw)
 
     def _open(self, path, mode='r', *args, **kw):
         if mode not in ('r', 'rt', 'rb', 'rU', 'U') and not self._ok(path):
