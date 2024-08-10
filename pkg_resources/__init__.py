@@ -3172,7 +3172,7 @@ class Distribution:
         version = version or "[unknown version]"
         return "%s %s" % (self.project_name, version)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str):
         """Delegate all unrecognized public attributes to .metadata provider"""
         if attr.startswith('_'):
             raise AttributeError(attr)

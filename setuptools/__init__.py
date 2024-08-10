@@ -31,6 +31,32 @@ from .dist import Distribution
 from .extension import Extension
 from .warnings import SetuptoolsDeprecationWarning
 
+if TYPE_CHECKING:
+    from .command.alias import alias
+    from .command.bdist_egg import bdist_egg
+    from .command.bdist_rpm import bdist_rpm
+    from .command.bdist_wheel import bdist_wheel
+    from .command.build import build
+    from .command.build_clib import build_clib
+    from .command.build_ext import build_ext
+    from .command.build_py import build_py
+    from .command.develop import develop
+    from .command.dist_info import dist_info
+    from .command.easy_install import easy_install
+    from .command.editable_wheel import editable_wheel
+    from .command.egg_info import egg_info
+    from .command.install import install
+    from .command.install_egg_info import install_egg_info
+    from .command.install_lib import install_lib
+    from .command.install_scripts import install_scripts
+    from .command.register import register
+    from .command.rotate import rotate
+    from .command.saveopts import saveopts
+    from .command.sdist import sdist
+    from .command.setopt import setopt
+    from .command.upload import upload
+    from .command.upload_docs import upload_docs
+
 __all__ = [
     'setup',
     'Distribution',
@@ -88,7 +114,7 @@ def _install_setup_requires(attrs):
         _fetch_build_eggs(dist)
 
 
-def _fetch_build_eggs(dist):
+def _fetch_build_eggs(dist: Distribution):
     try:
         dist.fetch_build_eggs(dist.setup_requires)
     except Exception as ex:
@@ -119,10 +145,8 @@ def setup(**attrs):
 setup.__doc__ = distutils.core.setup.__doc__
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     # Work around a mypy issue where type[T] can't be used as a base: https://github.com/python/mypy/issues/10962
-    _Command: TypeAlias = distutils.core.Command
+    from distutils.core import Command as _Command
 else:
     _Command = monkey.get_unpatched(distutils.core.Command)
 
@@ -187,7 +211,7 @@ class Command(_Command, ABC):
             )
         return val
 
-    def ensure_string_list(self, option):
+    def ensure_string_list(self, option: str):
         r"""Ensure that 'option' is a list of strings.  If 'option' is
         currently a string, we split it either on /,\s*/ or /\s+/, so
         "foo bar baz", "foo,bar,baz", and "foo,   bar baz" all become
@@ -213,33 +237,6 @@ class Command(_Command, ABC):
                 raise DistutilsOptionError(
                     "'%s' must be a list of strings (got %r)" % (option, val)
                 )
-
-    if TYPE_CHECKING:
-        from .command.alias import alias
-        from .command.bdist_egg import bdist_egg
-        from .command.bdist_rpm import bdist_rpm
-        from .command.bdist_wheel import bdist_wheel
-        from .command.build import build
-        from .command.build_clib import build_clib
-        from .command.build_ext import build_ext
-        from .command.build_py import build_py
-        from .command.develop import develop
-        from .command.dist_info import dist_info
-        from .command.easy_install import easy_install
-        from .command.editable_wheel import editable_wheel
-        from .command.egg_info import egg_info
-        from .command.install import install
-        from .command.install_egg_info import install_egg_info
-        from .command.install_lib import install_lib
-        from .command.install_scripts import install_scripts
-        from .command.register import register
-        from .command.rotate import rotate
-        from .command.saveopts import saveopts
-        from .command.sdist import sdist
-        from .command.setopt import setopt
-        from .command.test import test
-        from .command.upload import upload
-        from .command.upload_docs import upload_docs
 
     @overload  # type: ignore[override]
     def reinitialize_command(
@@ -335,10 +332,6 @@ class Command(_Command, ABC):
     def reinitialize_command(
         self, command: Literal["setopt"], reinit_subcommands: bool = False, **kw
     ) -> setopt: ...
-    @overload
-    def reinitialize_command(
-        self, command: Literal["test"], reinit_subcommands: bool = False, **kw
-    ) -> test: ...
     @overload
     def reinitialize_command(
         self, command: Literal["upload"], reinit_subcommands: bool = False, **kw

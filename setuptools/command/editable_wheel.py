@@ -23,6 +23,7 @@ from inspect import cleandoc
 from itertools import chain, starmap
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Iterable,
@@ -381,11 +382,16 @@ class editable_wheel(Command):
 
 
 class EditableStrategy(Protocol):
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]): ...
-
+    def __call__(
+        self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]
+    ): ...
     def __enter__(self): ...
-
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ): ...
 
 
 class _StaticPth:
@@ -394,7 +400,7 @@ class _StaticPth:
         self.name = name
         self.path_entries = path_entries
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         entries = "\n".join(str(p.resolve()) for p in self.path_entries)
         contents = _encode_pth(f"{entries}\n")
         wheel.writestr(f"__editable__.{self.name}.pth", contents)
@@ -407,7 +413,12 @@ class _StaticPth:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback): ...
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ): ...
 
 
 class _LinkTree(_StaticPth):
@@ -433,7 +444,7 @@ class _LinkTree(_StaticPth):
         self._file = dist.get_command_obj("build_py").copy_file
         super().__init__(dist, name, [self.auxiliary_dir])
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         self._create_links(files, mapping)
         super().__call__(wheel, files, mapping)
 
@@ -450,7 +461,7 @@ class _LinkTree(_StaticPth):
             dest.parent.mkdir(parents=True)
         self._file(src_file, dest, link=link)
 
-    def _create_links(self, outputs, output_mapping):
+    def _create_links(self, outputs, output_mapping: Mapping[str, str]):
         self.auxiliary_dir.mkdir(parents=True, exist_ok=True)
         link_type = "sym" if _can_symlink_files(self.auxiliary_dir) else "hard"
         normalised = ((self._normalize_output(k), v) for k, v in output_mapping.items())
@@ -470,7 +481,12 @@ class _LinkTree(_StaticPth):
         _logger.warning(msg + _STRICT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ):
         msg = f"""\n
         Strict editable installation performed using the auxiliary directory:
             {self.auxiliary_dir}
@@ -522,7 +538,7 @@ class _TopLevelFinder:
         content = _encode_pth(f"import {finder}; {finder}.install()")
         yield (f"__editable__.{self.name}.pth", content)
 
-    def __call__(self, wheel: WheelFile, files: list[str], mapping: dict[str, str]):
+    def __call__(self, wheel: WheelFile, files: list[str], mapping: Mapping[str, str]):
         for file, content in self.get_implementation():
             wheel.writestr(file, content)
 
@@ -531,7 +547,12 @@ class _TopLevelFinder:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ):
         msg = """\n
         Please be careful with folders in your working directory with the same
         name as your package as they may take precedence during imports.
