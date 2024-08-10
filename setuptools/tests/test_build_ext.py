@@ -190,7 +190,7 @@ class TestBuildExtInplace:
         dist.script_name = 'setup.py'
         cmd = build_ext(dist)
         # TODO: False-positive [attr-defined], raise upstream
-        vars(cmd).update(build_lib=".build/lib", build_temp=".build/tmp", **opts)
+        vars(cmd).update(build_lib=".build/lib", build_temp=".build/tmp", **opts)  # type: ignore[attr-defined]
         cmd.ensure_finalized()
         return cmd
 

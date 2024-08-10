@@ -23,7 +23,6 @@ from typing import TYPE_CHECKING, Callable, Iterable, Literal, Sequence, cast
 from zipfile import ZIP_DEFLATED, ZIP_STORED
 
 from .. import Command, __version__
-from .egg_info import egg_info as egg_info_cls
 from wheel.metadata import pkginfo_to_metadata
 from packaging import tags
 from packaging import version as _packaging_version
@@ -259,7 +258,7 @@ class bdist_wheel(Command):
             bdist_base = self.get_finalized_command("bdist").bdist_base
             self.bdist_dir = os.path.join(bdist_base, "wheel")
 
-        egg_info = cast(egg_info_cls, self.distribution.get_command_obj("egg_info"))
+        egg_info = self.distribution.get_command_obj("egg_info")
         egg_info.ensure_finalized()  # needed for correct `wheel_dist_name`
 
         self.data_dir = self.wheel_dist_name + ".data"

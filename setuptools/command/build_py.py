@@ -11,12 +11,13 @@ import distutils.errors
 import itertools
 import stat
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, cast
 
 from more_itertools import unique_everseen
 
 from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning
+from ..command.build import build as build_cls
 
 _IMPLICIT_DATA_FILES = ('*.pyi', 'py.typed')
 
@@ -227,7 +228,7 @@ class build_py(orig.build_py):
 
         This function should filter this case of invalid files out.
         """
-        build = self.get_finalized_command("build")
+        build = cast(build_cls, self.get_finalized_command("build"))
         build_dirs = (egg_info, self.build_lib, build.build_temp, build.build_base)
         norm_dirs = [os.path.normpath(p) for p in build_dirs if p]
 

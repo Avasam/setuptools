@@ -2639,7 +2639,9 @@ def _cygwin_patch(filename: StrOrBytesPath):  # pragma: nocover
     would probably better, in Cygwin even more so, except
     that this seems to be by design...
     """
-    return os.path.abspath(filename) if sys.platform == 'cygwin' else filename
+    if sys.platform == 'cygwin':
+        return os.path.abspath(filename)  # type:ignore[type-var]
+    return filename
 
 
 if TYPE_CHECKING:

@@ -12,7 +12,7 @@ import functools
 import os
 import re
 import sys
-from typing import TYPE_CHECKING, TypeVar, overload
+from typing import TYPE_CHECKING, TypeVar, overload, Literal
 
 
 sys.path.extend(((vendor_path := os.path.join(os.path.dirname(os.path.dirname(__file__)), 'setuptools', '_vendor')) not in sys.path) * [vendor_path])  # fmt: skip
@@ -42,7 +42,7 @@ __all__ = [
     'find_namespace_packages',
 ]
 
-_CommandT = TypeVar("_CommandT", bound="_Command")
+_CommandT = TypeVar("_CommandT", bound="Command")
 
 bootstrap_install_from = None
 
@@ -214,10 +214,143 @@ class Command(_Command, ABC):
                     "'%s' must be a list of strings (got %r)" % (option, val)
                 )
 
+    if TYPE_CHECKING:
+        from .command.alias import alias
+        from .command.bdist_egg import bdist_egg
+        from .command.bdist_rpm import bdist_rpm
+        from .command.bdist_wheel import bdist_wheel
+        from .command.build import build
+        from .command.build_clib import build_clib
+        from .command.build_ext import build_ext
+        from .command.build_py import build_py
+        from .command.develop import develop
+        from .command.dist_info import dist_info
+        from .command.easy_install import easy_install
+        from .command.editable_wheel import editable_wheel
+        from .command.egg_info import egg_info
+        from .command.install import install
+        from .command.install_egg_info import install_egg_info
+        from .command.install_lib import install_lib
+        from .command.install_scripts import install_scripts
+        from .command.register import register
+        from .command.rotate import rotate
+        from .command.saveopts import saveopts
+        from .command.sdist import sdist
+        from .command.setopt import setopt
+        from .command.test import test
+        from .command.upload import upload
+        from .command.upload_docs import upload_docs
+
+    @overload  # type: ignore[override]
+    def reinitialize_command(
+        self, command: Literal["alias"], reinit_subcommands: bool = False, **kw
+    ) -> alias: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["bdist_egg"], reinit_subcommands: bool = False, **kw
+    ) -> bdist_egg: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["bdist_rpm"], reinit_subcommands: bool = False, **kw
+    ) -> bdist_rpm: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["bdist_wheel"], reinit_subcommands: bool = False, **kw
+    ) -> bdist_wheel: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["build"], reinit_subcommands: bool = False, **kw
+    ) -> build: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["build_clib"], reinit_subcommands: bool = False, **kw
+    ) -> build_clib: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["build_ext"], reinit_subcommands: bool = False, **kw
+    ) -> build_ext: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["build_py"], reinit_subcommands: bool = False, **kw
+    ) -> build_py: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["develop"], reinit_subcommands: bool = False, **kw
+    ) -> develop: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["dist_info"], reinit_subcommands: bool = False, **kw
+    ) -> dist_info: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["easy_install"], reinit_subcommands: bool = False, **kw
+    ) -> easy_install: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["editable_wheel"], reinit_subcommands: bool = False, **kw
+    ) -> editable_wheel: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["egg_info"], reinit_subcommands: bool = False, **kw
+    ) -> egg_info: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["install"], reinit_subcommands: bool = False, **kw
+    ) -> install: ...
+    @overload
+    def reinitialize_command(
+        self,
+        command: Literal["install_egg_info"],
+        reinit_subcommands: bool = False,
+        **kw,
+    ) -> install_egg_info: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["install_lib"], reinit_subcommands: bool = False, **kw
+    ) -> install_lib: ...
+    @overload
+    def reinitialize_command(
+        self,
+        command: Literal["install_scripts"],
+        reinit_subcommands: bool = False,
+        **kw,
+    ) -> install_scripts: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["register"], reinit_subcommands: bool = False, **kw
+    ) -> register: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["rotate"], reinit_subcommands: bool = False, **kw
+    ) -> rotate: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["saveopts"], reinit_subcommands: bool = False, **kw
+    ) -> saveopts: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["sdist"], reinit_subcommands: bool = False, **kw
+    ) -> sdist: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["setopt"], reinit_subcommands: bool = False, **kw
+    ) -> setopt: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["test"], reinit_subcommands: bool = False, **kw
+    ) -> test: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["upload"], reinit_subcommands: bool = False, **kw
+    ) -> upload: ...
+    @overload
+    def reinitialize_command(
+        self, command: Literal["upload_docs"], reinit_subcommands: bool = False, **kw
+    ) -> upload_docs: ...
     @overload
     def reinitialize_command(
         self, command: str, reinit_subcommands: bool = False, **kw
-    ) -> _Command: ...
+    ) -> Command: ...
     @overload
     def reinitialize_command(
         self, command: _CommandT, reinit_subcommands: bool = False, **kw
