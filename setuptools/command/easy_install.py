@@ -205,7 +205,7 @@ class easy_install(Command):
         # section, even if this is a "develop" or "install" command, or some
         # other embedding.
         self._dry_run = None
-        self.verbose = self.distribution.verbose
+        self.verbose = bool(self.distribution.verbose)
         self.distribution._set_command_options(
             self, self.distribution.get_option_dict('easy_install')
         )
@@ -1649,7 +1649,7 @@ class PthDistributions(Environment):
         while paths and not paths[-1].strip():
             paths.pop()
             dirty = True
-        return paths, dirty or (paths and saw_import)
+        return paths, dirty or bool(paths and saw_import)
 
     def _load(self):
         if os.path.isfile(self.filename):

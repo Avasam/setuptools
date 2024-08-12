@@ -800,7 +800,7 @@ class Distribution(_Distribution):
             )
         else:
             new = [item for item in value if item not in old]
-            setattr(self, name, old + new)
+            setattr(self, name, list(old) + new)
 
     def exclude(self, **attrs):
         """Remove items from distribution that are named in keyword arguments

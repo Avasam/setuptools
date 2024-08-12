@@ -159,17 +159,16 @@ def _msvc14_find_vcvarsall(plat_spec):
 
     if not best_dir:
         best_version, best_dir = _msvc14_find_vc2015()
-        if best_version:
-            vcruntime = join(
-                best_dir,
-                'redist',
-                vcruntime_plat,
-                "Microsoft.VC140.CRT",
-                "vcruntime140.dll",
-            )
+        if not (best_version and best_dir):
+            return None, None
 
-    if not best_dir:
-        return None, None
+        vcruntime = join(
+            best_dir,
+            'redist',
+            vcruntime_plat,
+            "Microsoft.VC140.CRT",
+            "vcruntime140.dll",
+        )
 
     vcvarsall = join(best_dir, "vcvarsall.bat")
     if not isfile(vcvarsall):
@@ -830,7 +829,9 @@ class SystemInfo:
             return '8.1', '8.1a'
         elif self.vs_ver >= 14.0:
             return '10.0', '8.1'
-        return None
+        raise distutils.errors.DistutilsPlatformError(
+            f'Microsoft Windows SDK versions found for specified MSVC++ version {self.vs_ver}'
+        )
 
     @property
     def WindowsSdkLastVersion(self):
@@ -956,7 +957,7 @@ class SystemInfo:
             if sdkdir:
                 return sdkdir or ''
 
-        return None
+        return ''
 
     @property
     def UniversalCRTSdkLastVersion(self):
@@ -1089,7 +1090,9 @@ class SystemInfo:
             return 'v3.5', 'v2.0.50727'
         elif self.vs_ver == 8.0:
             return 'v3.0', 'v2.0.50727'
-        return None
+        raise distutils.errors.DistutilsPlatformError(
+            f'No suitable Microsoft .NET Framework {bits}bit version found'
+        )
 
     @staticmethod
     def _use_last_dir_name(path, prefix=''):
