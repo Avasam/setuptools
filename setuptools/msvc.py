@@ -16,6 +16,7 @@ from __future__ import annotations
 import contextlib
 import itertools
 import json
+import os
 import platform
 import subprocess
 from os import listdir, pathsep
@@ -679,30 +680,33 @@ class SystemInfo:
 
         try:
             hashed_names = listdir(instances_dir)
-
         except OSError:
             # Directory not exists with all Visual Studio versions
             return vs_versions
 
         for name in hashed_names:
-            try:
-                # Get VS installation path from "state.json" file
-                state_path = join(instances_dir, name, 'state.json')
-                with open(state_path, 'rt', encoding='utf-8') as state_file:
-                    state = json.load(state_file)
-                vs_path = state['installationPath']
+            # Get VS installation path from "state.json" file
+            state_path = join(instances_dir, name, 'state.json')
 
-                # Raises OSError if this VS installation does not contain VC
-                listdir(join(vs_path, r'VC\Tools\MSVC'))
-
-                # Store version and path
-                vs_versions[self._as_float_version(state['installationVersion'])] = (
-                    vs_path
-                )
-
-            except (OSError, KeyError):
-                # Skip if "state.json" file is missing or bad format
+            if not os.path.isfile(state_path) or not os.access(state_path, os.R_OK):
+                # Skip if "state.json" file is missing, not a file, or lacks permission
                 continue
+
+            with open(state_path, 'rt', encoding='utf-8') as state_file:
+                state = json.load(state_file)
+
+            vs_path = state.get('installationPath')
+            vs_version = state.get('installationVersion')
+            if vs_path is None or vs_version is None:
+                # Skip if "state.json" file has bad format
+                continue
+
+            if not os.path.isdir(join(vs_path, 'VC', 'Tools', 'MSVC')):
+                # Skip if this VS installation does not contain VC
+                continue
+
+            # Store version and path
+            vs_versions[self._as_float_version(vs_version)] = vs_path
 
         return vs_versions
 

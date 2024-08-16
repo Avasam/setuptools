@@ -3091,15 +3091,12 @@ class Distribution:
     def requires(self, extras: Iterable[str] = ()) -> list[Requirement]:
         """List of Requirements needed for this distro if `extras` are used"""
         dm = self._dep_map
-        deps: list[Requirement] = []
-        deps.extend(dm.get(None, ()))
+        deps = dm.get(None, [])
         for ext in extras:
-            try:
-                deps.extend(dm[safe_extra(ext)])
-            except KeyError as e:
-                raise UnknownExtra(
-                    "%s has no such extra feature %r" % (self, ext)
-                ) from e
+            reqs = dm.get(safe_extra(ext))
+            if reqs is None:
+                raise UnknownExtra(f"{self} has no such extra feature {ext!r}")
+            deps.extend(reqs)
         return deps
 
     def _get_metadata_path_for_display(self, name):
@@ -3286,7 +3283,7 @@ class Distribution:
         while True:
             try:
                 np = npath.index(nloc, p + 1)
-            except ValueError:
+            except ValueError:  # noqa: PERF203
                 break
             else:
                 del npath[np], path[np]

@@ -461,7 +461,7 @@ class PackageIndex(Environment):
         for match in HREF.finditer(page):
             try:
                 self._scan(urllib.parse.urljoin(url, htmldecode(match.group(1))))
-            except ValueError:
+            except ValueError:  # noqa: PERF203 # Can this even throw a ValueError ?
                 pass
 
         pkg, ver = self._scan(url)  # ensure this page is in the page index

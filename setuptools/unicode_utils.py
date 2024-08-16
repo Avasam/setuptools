@@ -34,7 +34,7 @@ def filesys_decode(path):
     for enc in candidates:
         try:
             return path.decode(enc)
-        except UnicodeDecodeError:
+        except UnicodeDecodeError:  # noqa: PERF203
             continue
 
     return None
