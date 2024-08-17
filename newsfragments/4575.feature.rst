@@ -1,1 +1,2 @@
-Allows using `dict` where an ordered iterable (previously restricted to `tuple` or `list`) is expected -- by :user:`Avasam`
+Allows using `dict` as an ordered type in ``setuptools.dist.check_requirements`` -- by :user:`Avasam`
+Be more explicit about the expected type when parsing ``Distribution`` data -- by :user:`Avasam`
