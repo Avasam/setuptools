@@ -8,7 +8,17 @@ import re
 import sys
 from glob import iglob
 from pathlib import Path
-from typing import TYPE_CHECKING, MutableMapping
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    MutableMapping,
+    NoReturn,
+    Tuple,
+    Union,
+    overload,
+)
 
 from more_itertools import partition, unique_everseen
 from ordered_set import OrderedSet
@@ -22,6 +32,7 @@ from . import (
     command as _,  # noqa: F401 # imported for side-effects
 )
 from ._importlib import metadata
+from ._reqs import _StrOrIter
 from .config import pyprojecttoml, setupcfg
 from .discovery import ConfigDiscovery
 from .monkey import get_unpatched
@@ -37,9 +48,16 @@ from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from distutils.fancy_getopt import translate_longopt
 from distutils.util import strtobool
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
 __all__ = ['Distribution']
 
-sequence = tuple, list
+sequence = tuple, list  # unused
+_ordered_iterable = tuple, list, dict
+"""Iterable types that are known to be ordered and not match a str (which `Sequence[str]` does) for use with `isinstance`"""
+_OrderedIterable: TypeAlias = Union[Tuple[str, ...], List[str], Dict[str, Any]]
+"""Iterable types that are known to be ordered and not match a str (which `Sequence[str]` does) for use as an annotation"""
 
 
 def check_importable(dist, attr, value):
@@ -52,17 +70,17 @@ def check_importable(dist, attr, value):
         ) from e
 
 
-def assert_string_list(dist, attr, value):
+def assert_string_list(dist, attr: str, value: _OrderedIterable):
     """Verify that value is a string list"""
     try:
         # verify that value is a list or tuple to exclude unordered
         # or single-use iterables
-        assert isinstance(value, sequence)
+        assert isinstance(value, _ordered_iterable)
         # verify that elements of value are strings
         assert ''.join(value) != value
     except (TypeError, ValueError, AttributeError, AssertionError) as e:
         raise DistutilsSetupError(
-            "%r must be a list of strings (got %r)" % (attr, value)
+            f"{attr!r} must be an ordered iterable of strings (got {value!r})"
         ) from e
 
 
@@ -139,11 +157,15 @@ def invalid_unless_false(dist, attr, value):
     raise DistutilsSetupError(f"{attr} is invalid.")
 
 
-def check_requirements(dist, attr, value):
+@overload
+def check_requirements(dist, attr: str, value: set) -> NoReturn: ...
+@overload
+def check_requirements(dist, attr: str, value: _StrOrIter) -> None: ...
+def check_requirements(dist, attr: str, value: _StrOrIter) -> None:
     """Verify that install_requires is a valid requirements list"""
     try:
         list(_reqs.parse(value))
-        if isinstance(value, (dict, set)):
+        if isinstance(value, set):
             raise TypeError("Unordered types are not allowed")
     except (TypeError, ValueError) as error:
         tmpl = (
@@ -766,35 +788,37 @@ class Distribution(_Distribution):
 
         return False
 
-    def _exclude_misc(self, name, value):
+    def _exclude_misc(self, name: str, value: _OrderedIterable):
         """Handle 'exclude()' for list/tuple attrs without a special handler"""
-        if not isinstance(value, sequence):
+        if not isinstance(value, _ordered_iterable):
             raise DistutilsSetupError(
-                "%s: setting must be a list or tuple (%r)" % (name, value)
+                f"{name}: setting must be of type {_ordered_iterable} (got {value!r})"
             )
         try:
             old = getattr(self, name)
         except AttributeError as e:
             raise DistutilsSetupError("%s: No such distribution setting" % name) from e
-        if old is not None and not isinstance(old, sequence):
+        if old is not None and not isinstance(old, _ordered_iterable):
             raise DistutilsSetupError(
                 name + ": this setting cannot be changed via include/exclude"
             )
         elif old:
             setattr(self, name, [item for item in old if item not in value])
 
-    def _include_misc(self, name, value):
+    def _include_misc(self, name: str, value: _OrderedIterable):
         """Handle 'include()' for list/tuple attrs without a special handler"""
 
-        if not isinstance(value, sequence):
-            raise DistutilsSetupError("%s: setting must be a list (%r)" % (name, value))
+        if not isinstance(value, _ordered_iterable):
+            raise DistutilsSetupError(
+                f"{name}: setting must be of type {_ordered_iterable} (got {value!r})"
+            )
         try:
             old = getattr(self, name)
         except AttributeError as e:
             raise DistutilsSetupError("%s: No such distribution setting" % name) from e
         if old is None:
             setattr(self, name, value)
-        elif not isinstance(old, sequence):
+        elif not isinstance(old, _ordered_iterable):
             raise DistutilsSetupError(
                 name + ": this setting cannot be changed via include/exclude"
             )
@@ -825,10 +849,10 @@ class Distribution(_Distribution):
             else:
                 self._exclude_misc(k, v)
 
-    def _exclude_packages(self, packages):
-        if not isinstance(packages, sequence):
+    def _exclude_packages(self, packages: _OrderedIterable):
+        if not isinstance(packages, _ordered_iterable):
             raise DistutilsSetupError(
-                "packages: setting must be a list or tuple (%r)" % (packages,)
+                f"packages: setting must be of type {_ordered_iterable} (got {packages!r})"
             )
         list(map(self.exclude_package, packages))
 
