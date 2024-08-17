@@ -1,0 +1,1 @@
+Allows using `dict` where an ordered iterable (previously restricted to `tuple` or `list`) is expected -- by :user:`Avasam`
