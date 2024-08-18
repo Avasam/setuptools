@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from distutils.errors import DistutilsArgError
-import inspect
 import glob
+import inspect
 import platform
-import distutils.command.install as orig
+from collections.abc import Callable
 from typing import Any, ClassVar
 
 import setuptools
+
 from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning, SetuptoolsWarning
+
+import distutils.command.install as orig
+from distutils.errors import DistutilsArgError
 
 # Prior to numpy 1.9, NumPy relies on the '_install' name, so provide it for
 # now. See https://github.com/pypa/setuptools/issues/199/

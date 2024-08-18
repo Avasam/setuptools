@@ -6,6 +6,7 @@ Provides exceptions used by setuptools modules.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 from distutils import errors as _distutils_errors
 
 if TYPE_CHECKING:

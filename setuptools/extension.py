@@ -1,15 +1,17 @@
 from __future__ import annotations
-import re
+
 import functools
-import distutils.core
-import distutils.errors
-import distutils.extension
+import re
 from typing import TYPE_CHECKING
 
 from setuptools._path import StrPath
 
 
 from .monkey import get_unpatched
+
+import distutils.core
+import distutils.errors
+import distutils.extension
 
 
 def _have_cython():

@@ -15,12 +15,11 @@ import contextlib
 import functools
 import os
 from collections import defaultdict
-from functools import partial
-from functools import wraps
+from functools import partial, wraps
 from typing import (
     TYPE_CHECKING,
-    Callable,
     Any,
+    Callable,
     Dict,
     Generic,
     Iterable,
@@ -32,20 +31,22 @@ from typing import (
     cast,
 )
 
-from .._path import StrPath
-from ..errors import FileError, OptionError
 from packaging.markers import default_environment as marker_env
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.version import InvalidVersion, Version
+
+from .._path import StrPath
+from ..errors import FileError, OptionError
 from ..warnings import SetuptoolsDeprecationWarning
 from . import expand
 
 if TYPE_CHECKING:
-    from distutils.dist import DistributionMetadata
+    from typing_extensions import TypeAlias
 
     from setuptools.dist import Distribution
-    from typing_extensions import TypeAlias
+
+    from distutils.dist import DistributionMetadata
 
 SingleCommandOptions: TypeAlias = Dict[str, Tuple[str, Any]]
 """Dict that associate the name of the options of a particular command to a

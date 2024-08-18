@@ -1,15 +1,12 @@
 from __future__ import annotations
 
+import fnmatch
+import itertools
+import os
+import stat
+import textwrap
 from functools import partial
 from glob import glob
-from distutils.util import convert_path
-import distutils.command.build_py as orig
-import os
-import fnmatch
-import textwrap
-import distutils.errors
-import itertools
-import stat
 from pathlib import Path
 from typing import Iterable, Iterator, cast
 
@@ -19,6 +16,10 @@ from setuptools._path import StrPath
 from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning
 from ..command.build import build as build_cls
+
+import distutils.command.build_py as orig
+import distutils.errors
+from distutils.util import convert_path
 
 _IMPLICIT_DATA_FILES = ('*.pyi', 'py.typed')
 

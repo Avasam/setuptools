@@ -3,14 +3,15 @@ import os
 import subprocess
 import sys
 import tempfile
-from distutils import log
-from distutils.errors import DistutilsError
 from functools import partial
 
 from . import _reqs
 from ._reqs import _StrOrIter
-from .wheel import Wheel
 from .warnings import SetuptoolsDeprecationWarning
+from .wheel import Wheel
+
+from distutils import log
+from distutils.errors import DistutilsError
 
 
 def _fixup_find_links(find_links):

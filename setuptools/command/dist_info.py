@@ -6,11 +6,12 @@ As defined in the wheel specification
 import os
 import shutil
 from contextlib import contextmanager
-from distutils import log
-from distutils.core import Command
 from pathlib import Path
 
 from .. import _normalization
+
+from distutils import log
+from distutils.core import Command
 
 
 class dist_info(Command):

@@ -14,11 +14,11 @@ from collections import defaultdict
 from itertools import filterfalse
 from typing import Dict, Mapping, TypeVar
 
-from .. import _reqs
-from .._reqs import _StrOrIter
 from jaraco.text import yield_lines
 from packaging.requirements import Requirement
 
+from .. import _reqs
+from .._reqs import _StrOrIter
 
 # dict can work as an ordered set
 _T = TypeVar("_T")

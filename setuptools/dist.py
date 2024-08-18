@@ -1,22 +1,44 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 import io
 import itertools
 import numbers
 import os
 import re
 import sys
+from collections.abc import Iterable
 from glob import iglob
 from pathlib import Path
 from typing import (
-    Any,
     TYPE_CHECKING,
+    Any,
+    Literal,
     MutableMapping,
     overload,
-    Literal,
     type_check_only,
 )
+
+from more_itertools import partition, unique_everseen
+from ordered_set import OrderedSet
+from packaging.markers import InvalidMarker, Marker
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import Version
+
+from setuptools._path import StrPath
+
+from . import (
+    Command,
+    _CommandT,
+    _entry_points,
+    _reqs,
+    command as _,  # noqa  -- imported for side-effects
+)
+from ._importlib import metadata
+from ._reqs import _StrOrIter
+from .config import pyprojecttoml, setupcfg
+from .discovery import ConfigDiscovery
+from .monkey import get_unpatched
+from .warnings import InformationOnly, SetuptoolsDeprecationWarning
 
 import distutils.cmd
 import distutils.command
@@ -28,26 +50,7 @@ from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from distutils.fancy_getopt import translate_longopt
 from distutils.util import strtobool
 
-from more_itertools import partition, unique_everseen
-from ordered_set import OrderedSet
-from packaging.markers import InvalidMarker, Marker
-from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from packaging.version import Version
-
-from . import Command, _CommandT, _entry_points
-from setuptools._path import StrPath
-
-from . import _reqs
-from ._reqs import _StrOrIter
-from . import command as _  # noqa  -- imported for side-effects
-from ._importlib import metadata
-from .config import setupcfg, pyprojecttoml
-from .discovery import ConfigDiscovery
-from .monkey import get_unpatched
-from .warnings import InformationOnly, SetuptoolsDeprecationWarning
-
 if TYPE_CHECKING:
-    from distutils.dist import DistributionMetadata
     from .command.alias import alias
     from .command.bdist_egg import bdist_egg
     from .command.bdist_rpm import bdist_rpm
@@ -72,6 +75,8 @@ if TYPE_CHECKING:
     from .command.setopt import setopt
     from .command.upload import upload
     from .command.upload_docs import upload_docs
+
+    from distutils.dist import DistributionMetadata
 
     @type_check_only
     class _DistributionMetadata(DistributionMetadata):
