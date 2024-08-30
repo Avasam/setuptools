@@ -8,12 +8,13 @@ import textwrap
 from functools import partial
 from glob import glob
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, cast
 
 from more_itertools import unique_everseen
 
 from setuptools._path import StrPath
 
+from ..command.build import build as build_cls
 from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning
 
@@ -46,8 +47,6 @@ class build_py(orig.build_py):
         orig.build_py.finalize_options(self)
         self.package_data = self.distribution.package_data
         self.exclude_package_data = self.distribution.exclude_package_data or {}
-        if 'data_files' in self.__dict__:
-            del self.__dict__['data_files']
         self.__updated_files = []
 
     def copy_file(  # type: ignore[override] # No overload, str support only
@@ -83,12 +82,10 @@ class build_py(orig.build_py):
         # output files are.
         self.byte_compile(orig.build_py.get_outputs(self, include_bytecode=False))
 
-    def __getattr__(self, attr: str):
+    @property
+    def data_files(self) -> list[tuple[str, str, str, list[str]]]:
         "lazily compute data files"
-        if attr == 'data_files':
-            self.data_files = self._get_data_files()
-            return self.data_files
-        return orig.build_py.__getattr__(self, attr)
+        return self._get_data_files()
 
     def build_module(self, module, module_file, package):
         outfile, copied = orig.build_py.build_module(self, module, module_file, package)
@@ -230,7 +227,7 @@ class build_py(orig.build_py):
 
         This function should filter this case of invalid files out.
         """
-        build = self.get_finalized_command("build")
+        build = cast(build_cls, self.get_finalized_command("build"))
         build_dirs = (egg_info, self.build_lib, build.build_temp, build.build_base)
         norm_dirs = [os.path.normpath(p) for p in build_dirs if p]
 

@@ -4,13 +4,12 @@ import glob
 import inspect
 import platform
 from collections.abc import Callable
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar
 
 import setuptools
 
 from ..dist import Distribution
 from ..warnings import SetuptoolsDeprecationWarning, SetuptoolsWarning
-from .bdist_egg import bdist_egg as bdist_egg_cls
 
 import distutils.command.install as orig
 from distutils.errors import DistutilsArgError
@@ -147,7 +146,7 @@ class install(orig.install):
         cmd.package_index.scan(glob.glob('*.egg'))
 
         self.run_command('bdist_egg')
-        bdist_egg = cast(bdist_egg_cls, self.distribution.get_command_obj('bdist_egg'))
+        bdist_egg = self.distribution.get_command_obj('bdist_egg')
         args = [bdist_egg.egg_output]
 
         if setuptools.bootstrap_install_from:

@@ -33,8 +33,12 @@ class Require:
             if attribute is None:
                 attribute = '__version__'
 
-        self.__dict__.update(locals())
-        del self.self
+        self.name = name
+        self.requested_version = requested_version
+        self.module = module
+        self.homepage = homepage
+        self.attribute = attribute
+        self.format = format
 
     def full_name(self):
         """Return full package/distribution name, w/version"""

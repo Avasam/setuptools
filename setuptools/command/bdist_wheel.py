@@ -26,7 +26,6 @@ from wheel.metadata import pkginfo_to_metadata
 from wheel.wheelfile import WheelFile
 
 from .. import Command, __version__
-from .egg_info import egg_info as egg_info_cls
 
 from distutils import log
 
@@ -260,7 +259,7 @@ class bdist_wheel(Command):
             bdist_base = self.get_finalized_command("bdist").bdist_base
             self.bdist_dir = os.path.join(bdist_base, "wheel")
 
-        egg_info = cast(egg_info_cls, self.distribution.get_command_obj("egg_info"))
+        egg_info = self.distribution.get_command_obj("egg_info")
         egg_info.ensure_finalized()  # needed for correct `wheel_dist_name`
 
         self.data_dir = self.wheel_dist_name + ".data"
@@ -296,10 +295,11 @@ class bdist_wheel(Command):
             raise ValueError(f"py-limited-api must match '{PY_LIMITED_API_PATTERN}'")
 
         if sysconfig.get_config_var("Py_GIL_DISABLED"):
+            abiflags = getattr(sys, 'abiflags', '')
             raise ValueError(
                 f"`py_limited_api={self.py_limited_api!r}` not supported. "
                 "`Py_LIMITED_API` is currently incompatible with "
-                f"`Py_GIL_DISABLED` ({sys.abiflags=!r}). "
+                f"`Py_GIL_DISABLED` ({abiflags=!r}). "
                 "See https://github.com/python/cpython/issues/111506."
             )
 

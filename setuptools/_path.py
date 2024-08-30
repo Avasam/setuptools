@@ -10,6 +10,7 @@ from more_itertools import unique_everseen
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+if sys.version_info >= (3, 9):
     StrPath: TypeAlias = Union[str, os.PathLike[str]]  #  Same as _typeshed.StrPath
 else:
     # Python 3.8 support
