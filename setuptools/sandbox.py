@@ -11,8 +11,8 @@ import re
 import sys
 import tempfile
 import textwrap
-from abc import ABC
 from types import TracebackType
+from typing import TYPE_CHECKING
 
 import pkg_resources
 from pkg_resources import working_set
@@ -20,11 +20,14 @@ from pkg_resources import working_set
 from distutils.errors import DistutilsError
 
 if sys.platform.startswith('java'):
-    import org.python.modules.posix.PosixModule as _os
+    import org.python.modules.posix.PosixModule as _os  # pyright: ignore[reportMissingImports]
 else:
     _os = sys.modules[os.name]
 _open = open
 
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = [
     "AbstractSandbox",
@@ -120,7 +123,7 @@ class ExceptionSaver:
     later.
     """
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -128,7 +131,7 @@ class ExceptionSaver:
         type: type[BaseException] | None,
         exc: BaseException | None,
         tb: TracebackType | None,
-    ):
+    ) -> bool:
         if not exc:
             return False
 
@@ -269,7 +272,7 @@ def run_setup(setup_script, args):
             # Normal exit, just return
 
 
-class AbstractSandbox(ABC):
+class AbstractSandbox:
     """Wrap 'os' module and 'open()' builtin for virtualizing setup scripts"""
 
     _active = False
@@ -285,17 +288,17 @@ class AbstractSandbox(ABC):
         for name in self._attrs:
             setattr(os, name, getattr(source, name))
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self._copy(self)
         builtins.open = self._open
         self._active = True
 
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ):
+        exc_type: object,
+        exc_value: object,
+        traceback: object,
+    ) -> None:
         self._active = False
         builtins.open = _open
         self._copy(_os)
@@ -521,6 +524,6 @@ class SandboxViolation(DistutilsError):
         """
     ).lstrip()
 
-    def __str__(self):
+    def __str__(self) -> str:
         cmd, args, kwargs = self.args
         return self.tmpl.format(**locals())

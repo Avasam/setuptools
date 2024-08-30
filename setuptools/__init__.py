@@ -11,7 +11,8 @@ import functools
 import os
 import re
 import sys
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Literal, TypeVar, overload
 
 sys.path.extend(((vendor_path := os.path.join(os.path.dirname(os.path.dirname(__file__)), 'setuptools', '_vendor')) not in sys.path) * [vendor_path])  # fmt: skip
@@ -86,7 +87,7 @@ def _install_setup_requires(attrs):
         fetch_build_eggs interface.
         """
 
-        def __init__(self, attrs):
+        def __init__(self, attrs: Mapping[str, object]):
             _incl = 'dependency_links', 'setup_requires'
             filtered = {k: attrs[k] for k in set(_incl) & set(attrs)}
             super().__init__(filtered)
@@ -152,7 +153,7 @@ else:
     _Command = monkey.get_unpatched(distutils.core.Command)
 
 
-class Command(_Command, ABC):
+class Command(_Command):
     """
     Setuptools internal actions are organized using a *command design pattern*.
     This means that each action (or group of closely related actions) executed during

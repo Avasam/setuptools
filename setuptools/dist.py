@@ -19,7 +19,6 @@ from typing import (
 )
 
 from more_itertools import partition, unique_everseen
-from ordered_set import OrderedSet
 from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import Version
@@ -298,7 +297,7 @@ class Distribution(_Distribution):
     _DISTUTILS_UNSUPPORTED_METADATA = {
         'long_description_content_type': lambda: None,
         'project_urls': dict,
-        'provides_extras': OrderedSet,
+        'provides_extras': dict,  # behaves like an ordered set
         'license_file': lambda: None,
         'license_files': lambda: None,
         'install_requires': list,
@@ -398,7 +397,7 @@ class Distribution(_Distribution):
                 # Setuptools allows a weird "<name>:<env markers> syntax for extras
                 extra = extra.split(':')[0]
                 if extra:
-                    self.metadata.provides_extras.add(extra)
+                    self.metadata.provides_extras.setdefault(extra)
 
     def _normalize_requires(self):
         """Make sure requirement-related attributes exist and are normalized"""

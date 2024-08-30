@@ -40,6 +40,8 @@ from ..warnings import SetuptoolsWarning
 from distutils.errors import DistutilsOptionError
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from setuptools.dist import Distribution
 
 _K = TypeVar("_K")
@@ -385,15 +387,15 @@ class EnsurePackagesDiscovered:
             self._called = True
             self._dist.set_defaults(name=False)  # Skip name, we can still be parsing
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
         self,
-        _exc_type: type[BaseException] | None,
-        _exc_value: BaseException | None,
-        _traceback: TracebackType | None,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         if self._called:
             self._dist.set_defaults.analyse_name()  # Now we can set a default name
 

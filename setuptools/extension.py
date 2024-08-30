@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from setuptools._path import StrPath
 
-
 from .monkey import get_unpatched
 
 import distutils.core
