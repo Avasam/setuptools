@@ -1,3 +1,73 @@
+v74.0.0
+=======
+
+Features
+--------
+
+- Changed the type of error raised by ``setuptools.command.easy_install.CommandSpec.from_param`` on unsupported argument from `AttributeError` to `TypeError` -- by :user:`Avasam` (#4548)
+- Added detection of ARM64 variant of MSVC -- by :user:`saschanaz` (#4553)
+- Made ``setuptools.package_index.Credential`` a `typing.NamedTuple` -- by :user:`Avasam` (#4585)
+- Reraise error from ``setuptools.command.easy_install.auto_chmod`` instead of nonsensical ``TypeError: 'Exception' object is not subscriptable`` -- by :user:`Avasam` (#4593)
+- Fully typed all collection attributes in ``pkg_resources`` -- by :user:`Avasam` (#4598)
+- Automatically exclude ``.tox|.nox|.venv`` directories from ``sdist``. (#4603)
+
+
+Deprecations and Removals
+-------------------------
+
+- Removed the monkeypatching of distutils._msvccompiler. Now all compiler logic is consolidated in distutils. (#4600)
+- Synced with pypa/distutils@58fe058e4, including consolidating Visual Studio 2017 support (#4600, pypa/distutils#289), removal of deprecated legacy MSVC compiler modules (pypa/distutils#287), suppressing of errors when the home directory is missing (pypa/distutils#278), removal of wininst binaries (pypa/distutils#282). (#4606)
+
+
+Misc
+----
+
+- #4592
+
+
+v73.0.1
+=======
+
+Bugfixes
+--------
+
+- Remove `abc.ABCMeta` metaclass from abstract classes. `pypa/setuptools#4503 <https://github.com/pypa/setuptools/pull/4503>`_ had an unintended consequence of causing potential ``TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict) subclass of the metaclasses of all its bases`` -- by :user:`Avasam` (#4579)
+
+
+v73.0.0
+=======
+
+Features
+--------
+
+- Mark abstract base classes and methods with `abc.ABC` and `abc.abstractmethod` -- by :user:`Avasam` (#4503)
+- Changed the order of type checks in ``setuptools.command.easy_install.CommandSpec.from_param`` to support any `collections.abc.Iterable` of `str` param -- by :user:`Avasam` (#4505)
+
+
+Bugfixes
+--------
+
+- Prevent an error in ``bdist_wheel`` if ``compression`` is set to a `str` (even if valid) after finalizing options but before running the command. -- by :user:`Avasam` (#4383)
+- Raises an exception when ``py_limited_api`` is used in a build with
+  ``Py_GIL_DISABLED``. This is currently not supported (python/cpython#111506). (#4420)
+- Synced with pypa/distutils@30b7331 including fix for modified check on empty sources (pypa/distutils#284).
+
+
+Deprecations and Removals
+-------------------------
+
+- ``setuptools`` is replacing the usages of :pypi:`ordered_set` with simple
+  instances of ``dict[Hashable, None]``. This is done to remove the extra
+  dependency and it is possible because since Python 3.7, ``dict`` maintain
+  insertion order. (#4574)
+
+
+Misc
+----
+
+- #4534, #4546, #4554, #4559, #4565
+
+
 v72.2.0
 =======
 

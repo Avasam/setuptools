@@ -692,7 +692,7 @@ class TestOptions:
                 'pdf': ['ReportLab>=1.2', 'RXP'],
                 'rest': ['docutils>=0.3', 'pack==1.1,==1.3'],
             }
-            assert dist.metadata.provides_extras == set(['pdf', 'rest'])
+            assert set(dist.metadata.provides_extras) == {'pdf', 'rest'}
 
     @pytest.mark.parametrize(
         "config",
