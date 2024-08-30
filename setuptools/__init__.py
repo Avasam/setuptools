@@ -35,7 +35,8 @@ from distutils.errors import DistutilsOptionError
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    # See MinimalDistribution note below
+    # See MinimalDistribution note below.
+    # We still want type-checkers to see setuptools.Distribution's attributes
     _Distribution: TypeAlias = Distribution
 else:
     _Distribution = distutils.core.Distribution
