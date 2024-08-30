@@ -362,14 +362,14 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
         raise errors.InternalError(msg)
 
     def prepare_metadata_for_build_wheel(
-        self, metadata_directory: str, config_settings: _ConfigSettings = None
+        self, metadata_directory: StrPath, config_settings: _ConfigSettings = None
     ):
         sys.argv = [
             *sys.argv[:1],
             *self._global_args(config_settings),
             "dist_info",
             "--output-dir",
-            metadata_directory,
+            str(metadata_directory),
             "--keep-egg-info",
         ]
         with no_install_setup_requires():
@@ -469,7 +469,7 @@ class _BuildMetaBackend(_ConfigSettingsTranslator):
             return self.get_requires_for_build_wheel(config_settings)
 
         def prepare_metadata_for_build_editable(
-            self, metadata_directory: str, config_settings: _ConfigSettings = None
+            self, metadata_directory: StrPath, config_settings: _ConfigSettings = None
         ):
             return self.prepare_metadata_for_build_wheel(
                 metadata_directory, config_settings

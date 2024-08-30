@@ -395,7 +395,7 @@ class EnsurePackagesDiscovered:
         exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
         traceback: TracebackType | None,
-    ) -> None:
+    ):
         if self._called:
             self._dist.set_defaults.analyse_name()  # Now we can set a default name
 

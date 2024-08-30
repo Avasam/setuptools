@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+from typing import Literal
 
 from .._path import ensure_directory
 from ..dist import Distribution
@@ -14,6 +15,8 @@ class install_scripts(orig.install_scripts):
     """Do normal script install, plus any egg_info wrapper scripts"""
 
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
+    # TODO: Remove once included in mypy 1.12 # python/typeshed#12607
+    dry_run: Literal[0, 1]
 
     def initialize_options(self):
         orig.install_scripts.initialize_options(self)

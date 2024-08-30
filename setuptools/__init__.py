@@ -92,7 +92,8 @@ def _install_setup_requires(attrs):
             filtered = {k: attrs[k] for k in set(_incl) & set(attrs)}
             super().__init__(filtered)
             # Prevent accidentally triggering discovery with incomplete set of attrs
-            self.set_defaults._disable()
+            self.set_defaults._disable()  # type: ignore[attr-defined]
+            # ^ Assume set_defaults was in attrs, can't do better w/o using a TypedDict
 
         def _get_project_config_files(self, filenames=None):
             """Ignore ``pyproject.toml``, they are not related to setup_requires"""
@@ -193,6 +194,8 @@ class Command(_Command):
 
     command_consumes_arguments = False
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
+    # TODO: Remove once included in mypy 1.12 # python/typeshed#12607
+    dry_run: Literal[0, 1]
 
     def __init__(self, dist: Distribution, **kw):
         """
@@ -213,7 +216,7 @@ class Command(_Command):
             )
         return val
 
-    def ensure_string_list(self, option: str):
+    def ensure_string_list(self, option: str):  # type: ignore[override] # Fixed in typeshed for mypy 1.12
         r"""Ensure that 'option' is a list of strings.  If 'option' is
         currently a string, we split it either on /,\s*/ or /\s+/, so
         "foo bar baz", "foo,bar,baz", and "foo,   bar baz" all become

@@ -54,8 +54,9 @@ from distutils import log
 from distutils.util import convert_path
 
 if TYPE_CHECKING:
-    from setuptools import Distribution
     from typing_extensions import TypeAlias
+
+    from setuptools import Distribution
 
 StrIter: TypeAlias = Iterator[str]
 chain_iter = itertools.chain.from_iterable

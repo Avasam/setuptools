@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 if sys.version_info >= (3, 9):
     StrPath: TypeAlias = Union[str, os.PathLike[str]]  #  Same as _typeshed.StrPath
 else:
+    # Python 3.8 support
     StrPath: TypeAlias = Union[str, os.PathLike]
 
 

@@ -295,10 +295,10 @@ class AbstractSandbox:
 
     def __exit__(
         self,
-        exc_type: object,
-        exc_value: object,
-        traceback: object,
-    ) -> None:
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
         self._active = False
         builtins.open = _open
         self._copy(_os)

@@ -23,7 +23,6 @@ from inspect import cleandoc
 from itertools import chain, starmap
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from types import TracebackType
 from typing import TYPE_CHECKING, Iterable, Iterator, Mapping, Protocol, TypeVar
 
 from .. import Command, _normalization, _path, errors, namespaces
@@ -133,7 +132,7 @@ class editable_wheel(Command):
             self._create_wheel_file(bdist_wheel)
         except Exception:
             traceback.print_exc()
-            # TODO: Fix false-positive [attr-defined] in typeshed
+            # TODO: Pending fix for false-positive [attr-defined] in typeshed https://github.com/python/typeshed/pull/12467
             project = self.distribution.name or self.distribution.get_name()
             _DebuggingTips.emit(project=project)
             raise
@@ -218,7 +217,6 @@ class editable_wheel(Command):
         """Set the ``editable_mode`` flag in the build sub-commands"""
         dist = self.distribution
         build = dist.get_command_obj("build")
-        # TODO: Update typeshed distutils stubs to overload non-None return type by default
         for cmd_name in build.get_sub_commands():
             cmd = dist.get_command_obj(cmd_name)
             if hasattr(cmd, "editable_mode"):
@@ -373,10 +371,9 @@ class EditableStrategy(Protocol):
     def __enter__(self) -> Self: ...
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-        /,
+        _exc_type: object,
+        _exc_value: object,
+        _traceback: object,
     ) -> object: ...
 
 

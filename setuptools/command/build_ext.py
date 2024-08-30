@@ -6,7 +6,7 @@ import sys
 from importlib.machinery import EXTENSION_SUFFIXES
 from importlib.util import cache_from_source as _compiled_file_name
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, Literal
 
 from setuptools.dist import Distribution
 from setuptools.errors import BaseError
@@ -91,6 +91,8 @@ class build_ext(_build_ext):
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
     editable_mode = False
     inplace = False
+    # TODO: Remove once included in mypy 1.12 # python/typeshed#12607
+    dry_run: Literal[0, 1]
 
     def run(self):
         """Build extensions in build directory, then copy if --inplace"""
