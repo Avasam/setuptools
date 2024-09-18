@@ -203,7 +203,9 @@ def _load_spec(spec: ModuleSpec, module_name: str) -> ModuleType:
         return sys.modules[name]
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module  # cache (it also ensures `==` works on loaded items)
-    spec.loader.exec_module(module)  # type: ignore
+    if spec.loader is None:
+        raise AttributeError(f"spec {spec} is missing a loader")
+    spec.loader.exec_module(module)
     return module
 
 
@@ -285,10 +287,10 @@ def find_packages(
 
     from setuptools.discovery import construct_package_dir
 
-    if namespaces:
-        from setuptools.discovery import PEP420PackageFinder as PackageFinder
+    if not namespaces:
+        from setuptools.discovery import PackageFinder
     else:
-        from setuptools.discovery import PackageFinder  # type: ignore
+        from setuptools.discovery import PEP420PackageFinder as PackageFinder
 
     root_dir = root_dir or os.curdir
     where = kwargs.pop('where', ['.'])
@@ -359,7 +361,8 @@ def entry_points(text: str, text_source: str = "entry-points") -> dict[str, dict
     entry-point names, and the second level values are references to objects
     (that correspond to the entry-point value).
     """
-    parser = ConfigParser(default_section=None, delimiters=("=",))  # type: ignore
+    # TODO: Explain why passing None is fine here when ConfigParser.default_section expects to be str
+    parser = ConfigParser(default_section=None, delimiters=("=",))  # type: ignore[call-overload]
     parser.optionxform = str  # case sensitive
     parser.read_string(text, text_source)
     groups = {k: dict(v.items()) for k, v in parser.items()}
