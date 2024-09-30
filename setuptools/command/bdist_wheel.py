@@ -456,16 +456,16 @@ class bdist_wheel(Command):
             f"{safer_version(self.distribution.get_version())}.dist-info"
         )
         distinfo_dir = os.path.join(self.bdist_dir, distinfo_dirname)
-        if self.dist_info_dir:
-            # Use the given dist-info directly.
-            log.debug(f"reusing {self.dist_info_dir}")
-            shutil.copytree(self.dist_info_dir, distinfo_dir)
-            # Egg info is still generated, so remove it now to avoid it getting
-            # copied into the wheel.
-            shutil.rmtree(self.egginfo_dir)
-        else:
-            # Convert the generated egg-info into dist-info.
-            self.egg2dist(self.egginfo_dir, distinfo_dir)
+        # if self.dist_info_dir:
+        #     # Use the given dist-info directly.
+        #     log.debug(f"reusing {self.dist_info_dir}")
+        #     shutil.copytree(self.dist_info_dir, distinfo_dir)
+        #     # Egg info is still generated, so remove it now to avoid it getting
+        #     # copied into the wheel.
+        #     shutil.rmtree(self.egginfo_dir)
+        # else:
+        # Convert the generated egg-info into dist-info.
+        self.egg2dist(self.egginfo_dir, distinfo_dir)
 
         self.write_wheelfile(distinfo_dir)
 
