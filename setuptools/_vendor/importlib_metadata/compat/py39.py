@@ -19,8 +19,9 @@ def normalized_name(dist: Distribution) -> Optional[str]:
         return dist._normalized_name
     except AttributeError:
         from .. import Prepared  # -> delay to prevent circular imports.
-        print(f"{dist=}")
-        print(f"{getattr(dist, 'name')=}")
+        print(f"{dist=!s}")
+        print(f"{getattr(dist, 'name', 'no name')=}")
+        print(f"{dist.metadata=!s}")
         print(f"{dist.metadata.get('Name')=}")
         return Prepared.normalize(getattr(dist, "name", None) or dist.metadata['Name'])
 
