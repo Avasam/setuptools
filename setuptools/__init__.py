@@ -32,6 +32,15 @@ from .warnings import SetuptoolsDeprecationWarning
 import distutils.core
 from distutils.errors import DistutilsOptionError
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    # See MinimalDistribution note below.
+    # We still want type-checkers to see setuptools.Distribution's attributes
+    _Distribution: TypeAlias = Distribution
+else:
+    _Distribution = distutils.core.Distribution
+
 __all__ = [
     'setup',
     'Distribution',
@@ -54,7 +63,7 @@ find_namespace_packages = PEP420PackageFinder.find
 def _install_setup_requires(attrs):
     # Note: do not use `setuptools.Distribution` directly, as
     # our PEP 517 backend patch `distutils.core.Distribution`.
-    class MinimalDistribution(distutils.core.Distribution):
+    class MinimalDistribution(_Distribution):
         """
         A minimal version of a distribution for supporting the
         fetch_build_eggs interface.
@@ -169,7 +178,7 @@ class Command(_Command):
     command_consumes_arguments = False
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
 
-    def __init__(self, dist: Distribution, **kw):
+    def __init__(self, dist: distutils.core.Distribution, **kw):
         """
         Construct the command for dist, updating
         vars(self) with any keyword parameters.

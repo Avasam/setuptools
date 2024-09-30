@@ -621,7 +621,7 @@ def _get_dist(dist_path, attrs):
         with Path(dist_path):
             dist = cast(
                 Distribution,
-                distutils.core.run_setup("setup.py", {}, stop_after="init"),
+                distutils.core.run_setup("setup.py", [], stop_after="init"),
             )
     else:
         dist = Distribution(attrs)
