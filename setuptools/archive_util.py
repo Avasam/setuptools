@@ -55,7 +55,7 @@ def unpack_archive(filename, extract_dir, progress_filter=default_filter, driver
     for driver in drivers or extraction_drivers:
         try:
             driver(filename, extract_dir, progress_filter)
-        except UnrecognizedFormat:
+        except UnrecognizedFormat:  # noqa: PERF203
             continue
         else:
             return
@@ -207,7 +207,7 @@ def unpack_tarfile(filename, extract_dir, progress_filter=default_filter):
         try:
             # XXX Ugh
             tarobj._extract_member(member, final_dst)
-        except tarfile.ExtractError:
+        except tarfile.ExtractError:  # noqa: PERF203
             # chown/chmod/mkfifo/mknode/makedev failed
             pass
 
