@@ -24,7 +24,7 @@ def normalized_name(dist: Distribution) -> Optional[str]:
         print(f"{getattr(dist, 'name', 'no name')=}")
         print(f"{dist.metadata=!s}")
         print(f"{dist.files=!s}")
-        print(f"{dist.origin=!s}")
+        print(f"{getattr(dist, 'origin', 'no origin')=!s}")
         print(f"{dist.entry_points=!s}")
         print(f"{dist.entry_points.names=!s}")
         print("A=================A")
