@@ -269,9 +269,9 @@ class bdist_wheel(Command):
             bdist_base = self.get_finalized_command("bdist").bdist_base
             self.bdist_dir = os.path.join(bdist_base, "wheel")
 
-        if self.dist_info_dir is None:
-            egg_info = cast(egg_info_cls, self.distribution.get_command_obj("egg_info"))
-            egg_info.ensure_finalized()  # needed for correct `wheel_dist_name`
+        # if self.dist_info_dir is None:
+        egg_info = cast(egg_info_cls, self.distribution.get_command_obj("egg_info"))
+        egg_info.ensure_finalized()  # needed for correct `wheel_dist_name`
 
         self.data_dir = self.wheel_dist_name + ".data"
         self.plat_name_supplied = bool(self.plat_name)
