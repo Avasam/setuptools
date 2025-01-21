@@ -5,6 +5,11 @@ python:
     extra_requirements:
       - doc
 
+# https://about.readthedocs.com/blog/2024/12/deprecate-config-files-without-sphinx-or-mkdocs-config/
+sphinx:
+  # Path to your Sphinx configuration file.
+  configuration: docs/conf.py
+
 # required boilerplate readthedocs/readthedocs.org#10401
 build:
   os: ubuntu-lts-latest
