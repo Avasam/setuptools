@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import functools
 import os
-import re
 import sys
 from abc import abstractmethod
 from collections.abc import Mapping
@@ -30,7 +29,6 @@ from .version import __version__ as __version__
 from .warnings import SetuptoolsDeprecationWarning
 
 import distutils.core
-from distutils.errors import DistutilsOptionError
 
 if TYPE_CHECKING:
     from .command.alias import alias
@@ -87,7 +85,7 @@ def _install_setup_requires(attrs):
         fetch_build_eggs interface.
         """
 
-        def __init__(self, attrs: Mapping[str, object]):
+        def __init__(self, attrs: Mapping[str, object]) -> None:
             _incl = 'dependency_links', 'setup_requires'
             filtered = {k: attrs[k] for k in set(_incl) & set(attrs)}
             super().__init__(filtered)
@@ -98,7 +96,7 @@ def _install_setup_requires(attrs):
         def _get_project_config_files(self, filenames=None):
             """Ignore ``pyproject.toml``, they are not related to setup_requires"""
             try:
-                cfg, toml = super()._split_standard_project_metadata(filenames)
+                cfg, _toml = super()._split_standard_project_metadata(filenames)
             except Exception:
                 return filenames, ()
             return cfg, ()
@@ -138,11 +136,13 @@ def _fetch_build_eggs(dist: Distribution):
         raise
 
 
-def setup(**attrs):
+def setup(**attrs) -> Distribution:
     logging.configure()
     # Make sure we have any requirements needed to interpret 'attrs'.
     _install_setup_requires(attrs)
-    return distutils.core.setup(**attrs)
+    # Override return type of distutils.core.Distribution with setuptools.dist.Distribution
+    # (implicitly implemented via `setuptools.monkey.patch_all`).
+    return distutils.core.setup(**attrs)  # type: ignore[return-value]
 
 
 setup.__doc__ = distutils.core.setup.__doc__
@@ -197,51 +197,13 @@ class Command(_Command):
     # TODO: Remove once included in mypy 1.12 # python/typeshed#12607
     dry_run: Literal[0, 1]
 
-    def __init__(self, dist: Distribution, **kw):
+    def __init__(self, dist: Distribution, **kw) -> None:
         """
         Construct the command for dist, updating
         vars(self) with any keyword parameters.
         """
         super().__init__(dist)
         vars(self).update(kw)
-
-    def _ensure_stringlike(self, option, what, default=None):
-        val = getattr(self, option)
-        if val is None:
-            setattr(self, option, default)
-            return default
-        elif not isinstance(val, str):
-            raise DistutilsOptionError(
-                "'%s' must be a %s (got `%s`)" % (option, what, val)
-            )
-        return val
-
-    def ensure_string_list(self, option: str):  # type: ignore[override] # Fixed in typeshed for mypy 1.12
-        r"""Ensure that 'option' is a list of strings.  If 'option' is
-        currently a string, we split it either on /,\s*/ or /\s+/, so
-        "foo bar baz", "foo,bar,baz", and "foo,   bar baz" all become
-        ["foo", "bar", "baz"].
-
-        ..
-           TODO: This method seems to be similar to the one in ``distutils.cmd``
-           Probably it is just here for backward compatibility with old Python versions?
-
-        :meta private:
-        """
-        val = getattr(self, option)
-        if val is None:
-            return
-        elif isinstance(val, str):
-            setattr(self, option, re.split(r',\s*|\s+', val))
-        else:
-            if isinstance(val, list):
-                ok = all(isinstance(v, str) for v in val)
-            else:
-                ok = False
-            if not ok:
-                raise DistutilsOptionError(
-                    "'%s' must be a list of strings (got %r)" % (option, val)
-                )
 
     @overload  # type: ignore[override]
     def reinitialize_command(
@@ -355,10 +317,10 @@ class Command(_Command):
     ) -> _CommandT: ...
     def reinitialize_command(
         self, command: str | _Command, reinit_subcommands: bool = False, **kw
-    ) -> _Command:
+    ) -> Command | _Command:
         cmd = _Command.reinitialize_command(self, command, reinit_subcommands)
         vars(cmd).update(kw)
-        return cmd
+        return cmd  # pyright: ignore[reportReturnType] # pypa/distutils#307
 
     @abstractmethod
     def initialize_options(self) -> None:
