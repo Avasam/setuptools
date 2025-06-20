@@ -194,8 +194,6 @@ class Command(_Command):
 
     command_consumes_arguments = False
     distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
-    # TODO: Remove once included in mypy 1.12 # python/typeshed#12607
-    dry_run: Literal[0, 1]
 
     def __init__(self, dist: Distribution, **kw) -> None:
         """
