@@ -41,10 +41,11 @@ from __future__ import annotations
 
 import itertools
 import os
+from collections.abc import Iterable, Iterator, Mapping
 from fnmatch import fnmatchcase
 from glob import glob
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, Iterator, Mapping
+from typing import TYPE_CHECKING
 
 import _distutils_hack.override  # noqa: F401
 

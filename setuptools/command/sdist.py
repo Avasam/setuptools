@@ -53,7 +53,7 @@ class sdist(orig.sdist):
     negative_opt: ClassVar[dict[str, str]] = {}  # type: ignore[misc] # Fixed upstream in typeshed to be a ClassVar. Should be included in mypy 1.12
 
     README_EXTENSIONS = ['', '.rst', '.txt', '.md']
-    READMES = tuple('README{0}'.format(ext) for ext in README_EXTENSIONS)
+    READMES = tuple(f'README{ext}' for ext in README_EXTENSIONS)
 
     def run(self):
         self.run_command('egg_info')

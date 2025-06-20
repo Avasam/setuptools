@@ -14,11 +14,12 @@ import struct
 import sys
 import sysconfig
 import warnings
+from collections.abc import Iterable, Sequence
 from email.generator import BytesGenerator, Generator
 from email.policy import EmailPolicy
 from glob import iglob
 from shutil import rmtree
-from typing import TYPE_CHECKING, Callable, Iterable, Literal, Sequence, cast
+from typing import TYPE_CHECKING, Callable, Literal, cast
 from zipfile import ZIP_DEFLATED, ZIP_STORED
 
 from packaging import tags, version as _packaging_version
@@ -381,9 +382,9 @@ class bdist_wheel(Command):
             supported_tags = [
                 (t.interpreter, t.abi, plat_name) for t in tags.sys_tags()
             ]
-            assert (
-                tag in supported_tags
-            ), f"would build wheel with unsupported tag {tag}"
+            assert tag in supported_tags, (
+                f"would build wheel with unsupported tag {tag}"
+            )
         return tag
 
     def run(self):

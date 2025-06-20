@@ -50,6 +50,7 @@ import types
 import warnings
 import zipfile
 import zipimport
+from collections.abc import Iterable, Iterator, Mapping, MutableSequence
 from pkgutil import get_importer
 from typing import (
     TYPE_CHECKING,
@@ -57,11 +58,7 @@ from typing import (
     BinaryIO,
     Callable,
     Dict,
-    Iterable,
-    Iterator,
     Literal,
-    Mapping,
-    MutableSequence,
     NamedTuple,
     NoReturn,
     Protocol,
@@ -133,7 +130,9 @@ class _ZipLoaderModule(Protocol):
     __loader__: zipimport.zipimporter
 
 
-_PEP440_FALLBACK = re.compile(r"^v?(?P<safe>(?:[0-9]+!)?[0-9]+(?:\.[0-9]+)*)", re.I)
+_PEP440_FALLBACK = re.compile(
+    r"^v?(?P<safe>(?:[0-9]+!)?[0-9]+(?:\.[0-9]+)*)", re.IGNORECASE
+)
 
 
 class PEP440Warning(RuntimeWarning):
@@ -424,7 +423,7 @@ def get_provider(moduleOrReq: str | Requirement) -> IResourceProvider | Distribu
     return _find_adapter(_provider_factories, loader)(module)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _macos_vers():
     version = platform.mac_ver()[0]
     # fallback for MacPorts
@@ -1704,7 +1703,7 @@ class NullProvider:
         except UnicodeDecodeError as exc:
             # Include the path in the error message to simplify
             # troubleshooting, and without changing the exception type.
-            exc.reason += ' in {} file at path: {}'.format(name, path)
+            exc.reason += f' in {name} file at path: {path}'
             raise
 
     def get_metadata_lines(self, name: str) -> Iterator[str]:
@@ -2664,7 +2663,7 @@ if TYPE_CHECKING:
 
 else:
 
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def _normalize_cached(filename):
         return normalize_path(filename)
 
@@ -3056,9 +3055,7 @@ class Distribution:
             version = self._get_version()
             if version is None:
                 path = self._get_metadata_path_for_display(self.PKG_INFO)
-                msg = ("Missing 'Version:' header and/or {} file at path: {}").format(
-                    self.PKG_INFO, path
-                )
+                msg = f"Missing 'Version:' header and/or {self.PKG_INFO} file at path: {path}"
                 raise ValueError(msg, self) from e
 
             return version

@@ -15,6 +15,7 @@ import contextlib
 import functools
 import os
 from collections import defaultdict
+from collections.abc import Iterable, Iterator
 from functools import partial, wraps
 from typing import (
     TYPE_CHECKING,
@@ -22,8 +23,6 @@ from typing import (
     Callable,
     Dict,
     Generic,
-    Iterable,
-    Iterator,
     List,
     Tuple,
     TypeVar,
@@ -375,8 +374,8 @@ class ConfigHandler(Generic[Target]):
             exclude_directive = 'file:'
             if value.startswith(exclude_directive):
                 raise ValueError(
-                    'Only strings are accepted for the {0} field, '
-                    'files are not accepted'.format(key)
+                    f'Only strings are accepted for the {key} field, '
+                    'files are not accepted'
                 )
             return value
 

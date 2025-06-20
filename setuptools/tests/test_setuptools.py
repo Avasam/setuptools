@@ -21,7 +21,7 @@ from distutils.errors import DistutilsSetupError
 
 @pytest.fixture(autouse=True)
 def isolated_dir(tmpdir_cwd):
-    yield
+    return
 
 
 def makeSetup(**args):

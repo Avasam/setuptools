@@ -3,10 +3,11 @@ from __future__ import annotations
 import itertools
 import os
 import sys
+from collections.abc import Iterator
 from importlib.machinery import EXTENSION_SUFFIXES
 from importlib.util import cache_from_source as _compiled_file_name
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, Literal
+from typing import TYPE_CHECKING, Literal
 
 from setuptools.dist import Distribution
 from setuptools.errors import BaseError
@@ -169,7 +170,7 @@ class build_ext(_build_ext):
             if not isinstance(ext_suffix, str):
                 raise OSError(
                     "Configuration variable EXT_SUFFIX not found for this platform "
-                    + "and environment variable SETUPTOOLS_EXT_SUFFIX is missing"
+                    "and environment variable SETUPTOOLS_EXT_SUFFIX is missing"
                 )
             so_ext = ext_suffix
 

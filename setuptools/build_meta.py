@@ -37,8 +37,9 @@ import sys
 import tempfile
 import tokenize
 import warnings
+from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Mapping, Union
+from typing import TYPE_CHECKING, List, Union
 
 import setuptools
 

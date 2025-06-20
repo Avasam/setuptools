@@ -327,9 +327,9 @@ class TestPTHFileWriter:
         pth_path = str(pth_subdir.join("file1.pth"))
         pth1 = PthDistributions(pth_path)
         pth2 = PthDistributions(pth_path)
-        assert (
-            pth1.paths == pth2.paths == []
-        ), "unless there would be some default added at some point"
+        assert pth1.paths == pth2.paths == [], (
+            "unless there would be some default added at some point"
+        )
         # and so putting the src_subdir in folder distinct than the pth one,
         # so to keep it absolute by PthDistributions
         new_src_path = tmpdir.join("src_subdir")
@@ -337,17 +337,17 @@ class TestPTHFileWriter:
         new_src_path_str = str(new_src_path)
         pth1.paths.append(new_src_path_str)
         pth1.save()
-        assert (
-            pth1.paths
-        ), "the new_src_path added must still be present/valid in pth1 after save"
+        assert pth1.paths, (
+            "the new_src_path added must still be present/valid in pth1 after save"
+        )
         # now,
-        assert (
-            new_src_path_str not in pth2.paths
-        ), "right before we save the entry should still not be present"
+        assert new_src_path_str not in pth2.paths, (
+            "right before we save the entry should still not be present"
+        )
         pth2.save()
-        assert (
-            new_src_path_str in pth2.paths
-        ), "the new_src_path entry should have been added by pth2 with its save() call"
+        assert new_src_path_str in pth2.paths, (
+            "the new_src_path entry should have been added by pth2 with its save() call"
+        )
         assert pth2.paths[-1] == new_src_path, (
             "and it should match exactly on the last entry actually "
             "given we append to it in save()"
@@ -407,14 +407,14 @@ class TestUserInstallTest:
         logging.basicConfig(level=logging.INFO, stream=sys.stderr)
         log.info('this should not break')
 
-    @pytest.fixture()
+    @pytest.fixture
     def foo_package(self, tmpdir):
         egg_file = tmpdir / 'foo-1.0.egg-info'
         with egg_file.open('w') as f:
             f.write('Name: foo\n')
         return str(tmpdir)
 
-    @pytest.fixture()
+    @pytest.fixture
     def install_target(self, tmpdir):
         target = str(tmpdir)
         with mock.patch('sys.path', sys.path + [target]):
@@ -719,8 +719,7 @@ class TestSetupRequires:
                         run_setup(test_setup_py, ['--name'])
                     except pkg_resources.VersionConflict:
                         self.fail(
-                            'Installing setup.py requirements '
-                            'caused a VersionConflict'
+                            'Installing setup.py requirements caused a VersionConflict'
                         )
 
                 assert 'FAIL' not in stdout.getvalue()
@@ -735,14 +734,14 @@ class TestSetupRequires:
                 (
                     'setup.py',
                     DALS(
-                        """
+                        f"""
                     import setuptools
                     setuptools.setup(
-                        name={name!r},
+                        name={distname!r},
                         version={version!r},
-                        py_modules=[{name!r}],
+                        py_modules=[{distname!r}],
                     )
-                    """.format(name=distname, version=version)
+                    """
                     ),
                 ),
                 (

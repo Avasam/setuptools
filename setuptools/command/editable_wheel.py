@@ -17,13 +17,14 @@ import logging
 import os
 import shutil
 import traceback
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import suppress
 from enum import Enum
 from inspect import cleandoc
 from itertools import chain, starmap
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Iterable, Iterator, Mapping, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar
 
 from .. import Command, _normalization, _path, errors, namespaces
 from .._path import StrPath
@@ -636,7 +637,7 @@ def _parent_path(pkg, pkg_path):
     >>> _parent_path("b", "src/c")
     'src/c'
     """
-    parent = pkg_path[: -len(pkg)] if pkg_path.endswith(pkg) else pkg_path
+    parent = pkg_path.removesuffix(pkg)
     return parent.rstrip("/" + os.sep)
 
 

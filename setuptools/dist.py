@@ -6,17 +6,10 @@ import numbers
 import os
 import re
 import sys
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
 from glob import iglob
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    MutableMapping,
-    overload,
-    type_check_only,
-)
+from typing import TYPE_CHECKING, Any, Literal, overload, type_check_only
 
 from more_itertools import partition, unique_everseen
 from packaging.markers import InvalidMarker, Marker
@@ -220,15 +213,15 @@ def check_package_data(dist, attr, value):
     """Verify that value is a dictionary of package names to glob lists"""
     if not isinstance(value, dict):
         raise DistutilsSetupError(
-            "{!r} must be a dictionary mapping package names to lists of "
-            "string wildcard patterns".format(attr)
+            f"{attr!r} must be a dictionary mapping package names to lists of "
+            "string wildcard patterns"
         )
     for k, v in value.items():
         if not isinstance(k, str):
             raise DistutilsSetupError(
-                "keys of {!r} dict must be strings (got {!r})".format(attr, k)
+                f"keys of {attr!r} dict must be strings (got {k!r})"
             )
-        assert_string_list(dist, 'values of {!r} dict'.format(attr), v)
+        assert_string_list(dist, f'values of {attr!r} dict', v)
 
 
 def check_packages(dist, attr, value):
@@ -1180,8 +1173,7 @@ class Distribution(_Distribution):
                 name, buildinfo = ext
             else:
                 name = ext.name
-            if name.endswith('module'):
-                name = name[:-6]
+            name = name.removesuffix('module')
             yield name
 
     def handle_display_options(self, option_order):

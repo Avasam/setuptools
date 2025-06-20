@@ -117,10 +117,7 @@ CHECK_PACKAGE_DATA_TESTS = (
         {
             'hello': '*.msg',
         },
-        (
-            "\"values of 'package_data' dict\" "
-            "must be a list of strings (got '*.msg')"
-        ),
+        ("\"values of 'package_data' dict\" must be a list of strings (got '*.msg')"),
     ),
     # Invalid value type (generators are single use)
     (

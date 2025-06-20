@@ -5,10 +5,11 @@ import itertools
 import os
 import stat
 import textwrap
+from collections.abc import Iterable, Iterator
 from functools import partial
 from glob import glob
 from pathlib import Path
-from typing import Iterable, Iterator, cast
+from typing import cast
 
 from more_itertools import unique_everseen
 

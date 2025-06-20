@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import io
 from collections import defaultdict
+from collections.abc import Mapping
 from itertools import filterfalse
-from typing import Dict, Mapping, TypeVar
+from typing import Dict, TypeVar
 
 from jaraco.text import yield_lines
 from packaging.requirements import Requirement
