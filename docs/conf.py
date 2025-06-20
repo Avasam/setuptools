@@ -136,6 +136,9 @@ html_theme_options = {
         "color-brand-primary": "#E5B62F",  # "yellow"
         "color-brand-content": "#E5B62F",
     },
+    "source_repository": "https://github.com/pypa/setuptools/",
+    "source_branch": "main",
+    "source_directory": "docs/",
 }
 
 # Redirect old docs so links and references in the ecosystem don't break
@@ -238,6 +241,7 @@ intersphinx_mapping.update({
     'pip': ('https://pip.pypa.io/en/latest', None),
     'build': ('https://build.pypa.io/en/latest', None),
     'PyPUG': ('https://packaging.python.org/en/latest', None),
+    'pytest': ('https://docs.pytest.org/en/stable', None),
     'packaging': ('https://packaging.pypa.io/en/latest', None),
     'twine': ('https://twine.readthedocs.io/en/stable', None),
     'importlib-resources': (
