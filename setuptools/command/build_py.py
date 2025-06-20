@@ -14,8 +14,6 @@ from typing import Any, cast
 
 from more_itertools import unique_everseen
 
-from setuptools._path import StrPath
-
 from .._path import StrPath, StrPathT
 from ..command.build import build as build_cls
 from ..dist import Distribution
