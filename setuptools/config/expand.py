@@ -207,7 +207,8 @@ def _load_spec(spec: ModuleSpec, module_name: str) -> ModuleType:
         return sys.modules[name]
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module  # cache (it also ensures `==` works on loaded items)
-    assert spec.loader is not None
+    if spec.loader is None:
+        raise AttributeError(f"spec {spec} is missing a loader")
     spec.loader.exec_module(module)
     return module
 

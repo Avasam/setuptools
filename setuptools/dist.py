@@ -10,7 +10,7 @@ import sys
 from collections.abc import Iterable, Iterator, MutableMapping, Sequence
 from glob import glob
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, Literal, Union, overload, type_check_only
 
 from more_itertools import partition, unique_everseen
 from packaging.markers import InvalidMarker, Marker
@@ -18,6 +18,8 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import Version
 
 from . import (
+    Command,
+    _CommandT,
     _entry_points,
     _reqs,
     _static,
@@ -45,6 +47,38 @@ from distutils.util import strtobool
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
+    from .command.alias import alias
+    from .command.bdist_egg import bdist_egg
+    from .command.bdist_rpm import bdist_rpm
+    from .command.bdist_wheel import bdist_wheel
+    from .command.build import build
+    from .command.build_clib import build_clib
+    from .command.build_ext import build_ext
+    from .command.build_py import build_py
+    from .command.develop import develop
+    from .command.dist_info import dist_info
+    from .command.easy_install import easy_install
+    from .command.editable_wheel import editable_wheel
+    from .command.egg_info import egg_info
+    from .command.install import install
+    from .command.install_egg_info import install_egg_info
+    from .command.install_lib import install_lib
+    from .command.install_scripts import install_scripts
+    from .command.register import register
+    from .command.rotate import rotate
+    from .command.saveopts import saveopts
+    from .command.sdist import sdist
+    from .command.setopt import setopt
+    from .command.upload import upload
+    from .command.upload_docs import upload_docs
+
+    from distutils.dist import DistributionMetadata
+
+    @type_check_only
+    class _DistributionMetadata(DistributionMetadata):
+        license_files: list[str]
+        license_file: str
 
 
 __all__ = ['Distribution']
@@ -298,6 +332,7 @@ class Distribution(_Distribution):
 
     # Used by build_py, editable_wheel and install_lib commands for legacy namespaces
     namespace_packages: list[str]  #: :meta private: DEPRECATED
+    metadata: _DistributionMetadata
 
     # Any: Dynamic assignment results in Incompatible types in assignment
     def __init__(self, attrs: MutableMapping[str, Any] | None = None) -> None:
@@ -853,6 +888,225 @@ class Distribution(_Distribution):
             return cmdclass
         else:
             return _Distribution.get_command_class(self, command)
+
+    if TYPE_CHECKING:
+
+        @overload  # type: ignore[override]
+        def get_command_obj(
+            self, command: Literal["alias"], create: Literal[True] = True
+        ) -> alias: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["bdist_egg"], create: Literal[True] = True
+        ) -> bdist_egg: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["bdist_rpm"], create: Literal[True] = True
+        ) -> bdist_rpm: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["bdist_wheel"], create: Literal[True] = True
+        ) -> bdist_wheel: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["build"], create: Literal[True] = True
+        ) -> build: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["build_clib"], create: Literal[True] = True
+        ) -> build_clib: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["build_ext"], create: Literal[True] = True
+        ) -> build_ext: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["build_py"], create: Literal[True] = True
+        ) -> build_py: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["develop"], create: Literal[True] = True
+        ) -> develop: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["dist_info"], create: Literal[True] = True
+        ) -> dist_info: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["easy_install"], create: Literal[True] = True
+        ) -> easy_install: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["editable_wheel"], create: Literal[True] = True
+        ) -> editable_wheel: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["egg_info"], create: Literal[True] = True
+        ) -> egg_info: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["install"], create: Literal[True] = True
+        ) -> install: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["install_egg_info"], create: Literal[True] = True
+        ) -> install_egg_info: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["install_lib"], create: Literal[True] = True
+        ) -> install_lib: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["install_scripts"], create: Literal[True] = True
+        ) -> install_scripts: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["register"], create: Literal[True] = True
+        ) -> register: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["rotate"], create: Literal[True] = True
+        ) -> rotate: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["saveopts"], create: Literal[True] = True
+        ) -> saveopts: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["sdist"], create: Literal[True] = True
+        ) -> sdist: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["setopt"], create: Literal[True] = True
+        ) -> setopt: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["upload"], create: Literal[True] = True
+        ) -> upload: ...
+        @overload
+        def get_command_obj(
+            self, command: Literal["upload_docs"], create: Literal[True] = True
+        ) -> upload_docs: ...
+        @overload
+        def get_command_obj(
+            self, command: str, create: Literal[True] = True
+        ) -> Command: ...
+        # Not replicating the overloads for "Command | None", user may use "isinstance"
+        @overload
+        def get_command_obj(
+            self, command: str, create: Literal[False]
+        ) -> Command | None: ...
+        def get_command_obj(
+            self, command: str, create: bool = True
+        ) -> distutils.cmd.Command | None: ...
+
+        @overload  # type: ignore[override]
+        def reinitialize_command(
+            self, command: Literal["alias"], reinit_subcommands: bool = False
+        ) -> alias: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["bdist_egg"], reinit_subcommands: bool = False
+        ) -> bdist_egg: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["bdist_rpm"], reinit_subcommands: bool = False
+        ) -> bdist_rpm: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["bdist_wheel"], reinit_subcommands: bool = False
+        ) -> bdist_wheel: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["build"], reinit_subcommands: bool = False
+        ) -> build: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["build_clib"], reinit_subcommands: bool = False
+        ) -> build_clib: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["build_ext"], reinit_subcommands: bool = False
+        ) -> build_ext: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["build_py"], reinit_subcommands: bool = False
+        ) -> build_py: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["develop"], reinit_subcommands: bool = False
+        ) -> develop: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["dist_info"], reinit_subcommands: bool = False
+        ) -> dist_info: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["easy_install"], reinit_subcommands: bool = False
+        ) -> easy_install: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["editable_wheel"], reinit_subcommands: bool = False
+        ) -> editable_wheel: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["egg_info"], reinit_subcommands: bool = False
+        ) -> egg_info: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["install"], reinit_subcommands: bool = False
+        ) -> install: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["install_egg_info"], reinit_subcommands: bool = False
+        ) -> install_egg_info: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["install_lib"], reinit_subcommands: bool = False
+        ) -> install_lib: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["install_scripts"], reinit_subcommands: bool = False
+        ) -> install_scripts: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["register"], reinit_subcommands: bool = False
+        ) -> register: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["rotate"], reinit_subcommands: bool = False
+        ) -> rotate: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["saveopts"], reinit_subcommands: bool = False
+        ) -> saveopts: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["sdist"], reinit_subcommands: bool = False
+        ) -> sdist: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["setopt"], reinit_subcommands: bool = False
+        ) -> setopt: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["upload"], reinit_subcommands: bool = False
+        ) -> upload: ...
+        @overload
+        def reinitialize_command(
+            self, command: Literal["upload_docs"], reinit_subcommands: bool = False
+        ) -> upload_docs: ...
+        @overload
+        def reinitialize_command(
+            self, command: str, reinit_subcommands: bool = False
+        ) -> Command: ...
+        @overload
+        def reinitialize_command(
+            self, command: _CommandT, reinit_subcommands: bool = False
+        ) -> _CommandT: ...
+        def reinitialize_command(
+            self, command: str | Command, reinit_subcommands: bool = False
+        ) -> distutils.cmd.Command: ...
 
     def print_commands(self):
         for ep in metadata.entry_points(group='distutils.commands'):

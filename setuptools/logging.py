@@ -37,4 +37,4 @@ def configure() -> None:
 
 def set_threshold(level: int) -> int:
     logging.root.setLevel(level * 10)
-    return set_threshold.unpatched(level)
+    return set_threshold.unpatched(level)  # type: ignore[attr-defined] # Patched a few lines above

@@ -4,7 +4,6 @@
 # and type-checkers aren't aware of distutils_hack,
 # causing distutils.command.bdist.bdist.format_commands to be Any.
 
-import sys
 
 from distutils.command.bdist import bdist
 
@@ -18,4 +17,4 @@ if 'egg' not in bdist.format_commands:
         bdist.format_command['egg'] = ('bdist_egg', "Python .egg file")
         bdist.format_commands.append('egg')
 
-del bdist, sys
+del bdist
