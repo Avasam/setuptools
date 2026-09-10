@@ -109,7 +109,7 @@ def setup(**attrs) -> Distribution:
     _install_setup_requires(attrs)
     # Override return type of distutils.core.Distribution with setuptools.dist.Distribution
     # (implicitly implemented via `setuptools.monkey.patch_all`).
-    return distutils.core.setup(**attrs)
+    return distutils.core.setup(**attrs)  # pyright: ignore[reportReturnType]
 
 
 setup.__doc__ = distutils.core.setup.__doc__

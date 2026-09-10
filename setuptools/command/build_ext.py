@@ -17,6 +17,7 @@ from setuptools.extension import Extension, Library
 
 from distutils import log
 from distutils.ccompiler import new_compiler
+from distutils.compilers.C.base import Compiler
 from distutils.sysconfig import customize_compiler, get_config_var
 
 if TYPE_CHECKING:
@@ -220,9 +221,12 @@ class build_ext(_build_ext):
             self.inplace = True
 
     def setup_shlib_compiler(self) -> None:
-        compiler = self.shlib_compiler = new_compiler(
-            compiler=self.compiler, force=bool(self.force)
-        )
+        if isinstance(self.compiler, Compiler):
+            compiler = self.compiler
+        else:
+            compiler = self.shlib_compiler = new_compiler(
+                compiler=self.compiler, force=bool(self.force)
+            )
         _customize_compiler_for_shlib(compiler)
 
         if self.include_dirs is not None:
