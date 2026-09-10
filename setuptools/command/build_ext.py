@@ -17,12 +17,12 @@ from setuptools.extension import Extension, Library
 
 from distutils import log
 from distutils.ccompiler import new_compiler
-from distutils.compilers.C.base import Compiler
 from distutils.sysconfig import customize_compiler, get_config_var
 
 if TYPE_CHECKING:
     # Cython not installed on CI tests, causing _build_ext to be `Any`
     from distutils.command.build_ext import build_ext as _build_ext
+    from distutils.compilers.C.base import Compiler
 else:
     try:
         # Attempt to use Cython for building extensions, if available
@@ -33,6 +33,8 @@ else:
         __import__('Cython.Compiler.Main')
     except ImportError:
         from distutils.command.build_ext import build_ext as _build_ext
+
+    from distutils.ccompiler import CCompiler as Compiler
 
 # make sure _config_vars is initialized
 get_config_var("LDSHARED")
