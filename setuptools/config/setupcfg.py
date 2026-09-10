@@ -182,7 +182,7 @@ def parse_configuration(
             command_options,
             ignore_option_errors,
             ensure_discovered,
-            distribution.package_dir,
+            dict(distribution.package_dir),
             distribution.src_root,
         )
         meta.parse()
@@ -540,7 +540,7 @@ class ConfigMetadataHandler(ConfigHandler["DistributionMetadata"]):
         options: AllCommandOptions,
         ignore_option_errors: bool,
         ensure_discovered: expand.EnsurePackagesDiscovered,
-        package_dir: dict | None = None,
+        package_dir: dict[str, str] | None = None,
         root_dir: StrPath | None = os.curdir,
     ) -> None:
         super().__init__(target_obj, options, ignore_option_errors, ensure_discovered)

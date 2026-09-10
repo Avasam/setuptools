@@ -112,7 +112,7 @@ class build_ext(_build_ext):
 
     def copy_extensions_to_source(self) -> None:
         build_py = self.get_finalized_command('build_py')
-        for ext in self.extensions:
+        for ext in self.extensions or ():
             inplace_file, regular_file = self._get_inplace_equivalent(build_py, ext)
 
             # Always copy, even if source is older than destination, to ensure
