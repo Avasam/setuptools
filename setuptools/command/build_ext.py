@@ -88,7 +88,11 @@ def get_abi3_suffix():
 
 
 class build_ext(_build_ext):
-    distribution: Distribution  # override distutils.dist.Distribution with setuptools.dist.Distribution
+    # override distutils.dist.Distribution with setuptools.dist.Distribution
+    distribution: Distribution
+    # override `list[distutils.extension.Extension] | None` with `list[setuptools.extension.Extension]`
+    # Not None because always set in finalize_options in this Command
+    extensions: list[Extension]
     editable_mode = False
     inplace = False
 
@@ -112,7 +116,7 @@ class build_ext(_build_ext):
 
     def copy_extensions_to_source(self) -> None:
         build_py = self.get_finalized_command('build_py')
-        for ext in self.extensions or ():
+        for ext in self.extensions:
             inplace_file, regular_file = self._get_inplace_equivalent(build_py, ext)
 
             # Always copy, even if source is older than destination, to ensure
