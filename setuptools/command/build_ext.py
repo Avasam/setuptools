@@ -223,12 +223,11 @@ class build_ext(_build_ext):
             self.inplace = True
 
     def setup_shlib_compiler(self) -> None:
-        if isinstance(self.compiler, Compiler):
-            compiler = self.compiler
-        else:
-            compiler = self.shlib_compiler = new_compiler(
-                compiler=self.compiler, force=bool(self.force)
-            )
+        compiler = self.shlib_compiler = (
+            self.compiler
+            if isinstance(self.compiler, Compiler)
+            else new_compiler(compiler=self.compiler, force=bool(self.force))
+        )
         _customize_compiler_for_shlib(compiler)
 
         if self.include_dirs is not None:
