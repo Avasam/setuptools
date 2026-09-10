@@ -331,7 +331,7 @@ class ConfigDiscovery:
     def _package_dir(self) -> dict[str, str]:
         if self.dist.package_dir is None:
             return {}
-        return dict(self.dist.package_dir)
+        return self.dist.package_dir
 
     def __call__(
         self, force: bool = False, name: bool = True, ignore_ext_modules: bool = False

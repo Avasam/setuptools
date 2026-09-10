@@ -92,7 +92,7 @@ class build_ext(_build_ext):
     distribution: Distribution
     # override `list[distutils.extension.Extension] | None` with `list[setuptools.extension.Extension]`
     # Not None because always set in finalize_options in this Command
-    extensions: list[Extension]
+    extensions: list[Extension]  # type: ignore[assignment]
     editable_mode = False
     inplace = False
 

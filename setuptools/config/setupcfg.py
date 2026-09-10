@@ -182,7 +182,7 @@ def parse_configuration(
             command_options,
             ignore_option_errors,
             ensure_discovered,
-            dict(distribution.package_dir),
+            distribution.package_dir,
             distribution.src_root,
         )
         meta.parse()
